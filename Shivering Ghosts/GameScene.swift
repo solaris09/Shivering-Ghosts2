@@ -1582,7 +1582,7 @@ class GameScene: SKScene {
         // Clear previous pattern
         patternDisplay.removeAllChildren()
         
-        let spacing: CGFloat = 110 // Increased spacing for larger icons
+        let spacing: CGFloat = 160 // Increased spacing for 150 size icons
         let startX = -CGFloat(targetPattern.count - 1) * spacing / 2
         
         for (index, item) in targetPattern.enumerated() {
@@ -1591,7 +1591,7 @@ class GameScene: SKScene {
             container.position = CGPoint(x: startX + CGFloat(index) * spacing, y: 0)
             container.name = "pattern_\(index)"
             
-            let size: CGFloat = 100 // Doubled from original 50
+            let size: CGFloat = 150 // Set to 150 as requested
             
             // Clothing icon
             if let imgName = item.imageName {
@@ -1695,8 +1695,8 @@ class GameScene: SKScene {
             itemSize = 60
             spacing = 80
         default:
-            itemSize = 130 // Doubled from original ~65
-            spacing = 150
+            itemSize = 150 // Set to 150 as requested
+            spacing = 170
         }
 
         // Ensure it fits within screen width
