@@ -162,6 +162,49 @@ enum GameState {
     case gameOver
 }
 
+// MARK: - PowerUps
+enum PowerUpType: String, CaseIterable {
+    case cocoa, campfire, magnet
+    
+    var imageName: String {
+        return "powerup_\(self.rawValue)"
+    }
+}
+
+class PowerUpNode: SKSpriteNode {
+    let type: PowerUpType
+    
+    init(type: PowerUpType) {
+        self.type = type
+        let texture = SKTexture(imageNamed: type.imageName)
+        super.init(texture: texture, color: .clear, size: CGSize(width: 50, height: 50))
+        self.name = "powerup"
+        
+        // Float animation
+        let float = SKAction.sequence([
+            SKAction.moveBy(x: 0, y: 10, duration: 1.0),
+            SKAction.moveBy(x: 0, y: -10, duration: 1.0)
+        ])
+        run(SKAction.repeatForever(float))
+        
+        // Glow
+        let glow = SKShapeNode(circleOfRadius: 30)
+        glow.fillColor = .yellow
+        glow.strokeColor = .clear
+        glow.alpha = 0.3
+        glow.zPosition = -1
+        addChild(glow)
+        glow.run(SKAction.repeatForever(SKAction.sequence([
+            SKAction.fadeAlpha(to: 0.6, duration: 0.5),
+            SKAction.fadeAlpha(to: 0.3, duration: 0.5)
+        ])))
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 // MARK: - Clothing Item Node
 class ClothingItemNode: SKNode {
     let clothing: ClothingItem
@@ -1587,6 +1630,11 @@ class GameScene: SKScene {
         
         // Update timer UI
         updateTimerUI()
+        
+        // Chance to spawn powerup
+        if Double.random(in: 0...100) < (0.05 * deltaTime * 60) { // Very rare per frame
+            spawnPowerUp()
+        }
     }
     
     private func updateTimerUI() {
@@ -1618,6 +1666,82 @@ class GameScene: SKScene {
         timerBar.position = CGPoint(x: size.width / 2 - (200 - barWidth) / 2, y: size.height - 75)
         timerBar.zPosition = 50
         addChild(timerBar)
+    }
+    
+        addChild(timerBar)
+    }
+    
+    // MARK: - PowerUp Logic
+    private func spawnPowerUp() {
+        // Only one at a time
+        if childNode(withName: "powerup") != nil { return }
+        
+        guard let type = PowerUpType.allCases.randomElement() else { return }
+        let powerUp = PowerUpNode(type: type)
+        
+        // Random position
+        let x = CGFloat.random(in: 50...(size.width - 50))
+        let y = CGFloat.random(in: 400...(size.height - 200))
+        powerUp.position = CGPoint(x: x, y: y)
+        powerUp.zPosition = 80
+        powerUp.alpha = 0
+        powerUp.setScale(0.1)
+        addChild(powerUp)
+        
+        powerUp.run(SKAction.sequence([
+            SKAction.group([
+                SKAction.fadeIn(withDuration: 0.3),
+                SKAction.scale(to: 1.0, duration: 0.3)
+            ]),
+            SKAction.wait(forDuration: 6.0), // Available for 6 seconds
+            SKAction.scale(to: 0, duration: 0.3),
+            SKAction.removeFromParent()
+        ]))
+    }
+    
+    private func activatePowerUp(_ node: PowerUpNode) {
+        node.removeAllActions()
+        node.run(SKAction.sequence([
+            SKAction.scale(to: 1.5, duration: 0.1),
+            SKAction.fadeOut(withDuration: 0.1),
+            SKAction.removeFromParent()
+        ]))
+        
+        playSFX("correct_match.m4a") // Reuse sound for now
+        triggerHaptic(.success)
+        
+        switch node.type {
+        case .cocoa:
+            // Freeze time
+            let freezeLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            freezeLabel.text = "❄️ TIME FREEZE!"
+            freezeLabel.fontSize = 24
+            freezeLabel.fontColor = .cyan
+            freezeLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+            freezeLabel.zPosition = 100
+            addChild(freezeLabel)
+            freezeLabel.run(SKAction.sequence([SKAction.wait(forDuration: 1.0), SKAction.fadeOut(withDuration: 0.5), SKAction.removeFromParent()]))
+            
+            timeRemaining += 5.0 // Or just add time
+            updateTimerUI()
+            
+        case .campfire:
+            // Instant Warmth
+            handleGhostWarmed()
+            
+        case .magnet:
+            // Auto complete next item
+            if currentPatternIndex < targetPattern.count {
+                let target = targetPattern[currentPatternIndex]
+                // Find matching node
+                if let matchNode = clothingItems.first(where: { $0.clothing == target }) {
+                   matchNode.removeAllActions()
+                   matchNode.run(SKAction.move(to: currentGhost?.position ?? CGPoint.zero, duration: 0.3)) {
+                       self.handleCorrectMatch(matchNode)
+                   }
+                }
+            }
+        }
     }
     
     private func ghostTimedOut() {
@@ -2336,15 +2460,24 @@ class GameScene: SKScene {
         
         // Playing state
         if gameState == .playing {
-            // Pause button
-            if touchedNodes.contains(where: { $0.name == "pauseButton" || $0.parent?.name == "pauseButton" }) {
-                triggerSelectionHaptic()
-                togglePause()
-                return
-            }
-            
-            // Clothing item selection
             for node in touchedNodes {
+                // Pause button
+                if node.name == "pauseButton" || node.parent?.name == "pauseButton" {
+                    triggerSelectionHaptic()
+                    togglePause()
+                    return
+                }
+                
+                // Check for powerups
+                if let powerUp = node as? PowerUpNode {
+                    activatePowerUp(powerUp)
+                    return
+                } else if let parent = node.parent as? PowerUpNode {
+                    activatePowerUp(parent)
+                    return
+                }
+                
+                // Clothing item selection
                 if let clothingNode = node as? ClothingItemNode {
                     selectedClothing = clothingNode
                     clothingNode.startDragging()
