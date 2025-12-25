@@ -426,6 +426,103 @@ def draw_leaf():
     
     return img
 
+def draw_heart():
+    """Draw a simple red heart"""
+    img = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Heart shape using bezier-ish
+    # Or just two circles and a triangle
+    color = (231, 76, 60, 255) # Red
+    
+    # Left circle
+    draw.ellipse([5, 5, 35, 35], fill=color)
+    # Right circle
+    draw.ellipse([29, 5, 59, 35], fill=color)
+    # Bottom triangle
+    draw.polygon([(8, 25), (56, 25), (32, 60)], fill=color)
+    
+    return img
+
+def draw_sweat():
+    """Draw a blue ice teardrop/sweat"""
+    img = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    color = (135, 206, 250, 255) # Light Blue
+    outline = (70, 130, 180, 255)
+    
+    points = [(32, 5), (50, 45), (32, 60), (14, 45)]
+    draw.polygon(points, fill=color, outline=outline)
+    return img
+
+def draw_hot_chocolate():
+    """Powerup: Mug of cocoa"""
+    img = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Mug
+    mug_color = (236, 240, 241, 255)
+    draw.rounded_rectangle([30, 40, 98, 110], radius=10, fill=mug_color, outline=(189, 195, 199, 255), width=4)
+    # Handle
+    draw.arc([90, 50, 115, 90], start=270, end=90, fill=(189, 195, 199, 255), width=6)
+    
+    # Cocoa
+    draw.ellipse([35, 42, 93, 58], fill=(139, 69, 19, 255))
+    
+    # Marshmallows
+    draw.rectangle([50, 45, 60, 55], fill=(255, 255, 255, 255))
+    draw.rectangle([70, 48, 80, 58], fill=(255, 255, 255, 255))
+    
+    # Steam
+    draw.line([50, 30, 50, 10], fill=(200, 200, 200, 150), width=3)
+    draw.line([78, 30, 78, 10], fill=(200, 200, 200, 150), width=3)
+    
+    return img
+
+def draw_campfire():
+    """Powerup: Campfire"""
+    img = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Logs
+    brown = (101, 67, 33, 255)
+    draw.line([20, 100, 108, 100], fill=brown, width=12) # Horizontal
+    draw.line([30, 110, 90, 80], fill=brown, width=10) # Cross
+    draw.line([90, 110, 30, 80], fill=brown, width=10) # Cross
+    
+    # Fire
+    # Outer Orange
+    draw.ellipse([40, 40, 88, 100], fill=(255, 140, 0, 220))
+    # Inner Yellow
+    draw.ellipse([50, 60, 78, 95], fill=(255, 215, 0, 255))
+    
+    return img
+
+def draw_magnet():
+    """Powerup: Magnet"""
+    img = Image.new('RGBA', (128, 128), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # U shape
+    red = (231, 76, 60, 255)
+    gray = (149, 165, 166, 255)
+    
+    # Draw thick arc
+    # Bounding box for outer circle
+    bbox = [24, 24, 104, 104]
+    draw.arc(bbox, start=180, end=0, fill=red, width=20)
+    
+    # Legs
+    draw.line([24, 64, 24, 100], fill=red, width=20)
+    draw.line([104, 64, 104, 100], fill=red, width=20)
+    
+    # Tips
+    draw.rectangle([14, 100, 34, 115], fill=gray)
+    draw.rectangle([94, 100, 114, 115], fill=gray)
+    
+    return img
+
 def draw_beanie(color_name):
     """Draw a beanie that fits the ghost head"""
     img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
@@ -571,8 +668,14 @@ def main():
     save_sprite(draw_sweater('orange'), "turuncu_kazak")
     save_sprite(draw_sweater('green'), "yesil_kazak")
     
-    # 5. Effects
+    # 5. Effects & Power-ups
     save_sprite(draw_leaf(), "leaf")
+    save_sprite(draw_heart(), "heart")
+    save_sprite(draw_sweat(), "icicle_sweat")
+    
+    save_sprite(draw_hot_chocolate(), "powerup_cocoa")
+    save_sprite(draw_campfire(), "powerup_campfire")
+    save_sprite(draw_magnet(), "powerup_magnet")
     
     print("✅ Done!")
 

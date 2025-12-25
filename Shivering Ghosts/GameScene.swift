@@ -917,89 +917,101 @@ class GhostNode: SKNode {
         }
     }
     
-    func freezeToDeath(completion: @escaping () -> Void) {
-        // Ghost freezes/dies - timeout animation
-        stopShivering()
+    // MARK: - Reactions
+    
+    func shakeHeadNo() {
+        guard let sprite = childNode(withName: "ghostSprite") else { return }
         
-        guard let sprite = childNode(withName: "ghostSprite") as? SKSpriteNode else {
-            removeFromParent()
-            completion()
-            return
-        }
+        // Remove existing actions to prevent conflict
+        sprite.removeAction(forKey: "shakeNo")
         
-        // Play freeze/death sound if available
-        playSFX("freeze_death.m4a")
+        let angle: CGFloat = 0.1
+        let duration: TimeInterval = 0.05
         
-        // Turn PURPLE and dark
-        // Using color blend (might cause border artifacts but requested by user)
-        let deathColor = SKAction.colorize(with: .purple, colorBlendFactor: 0.8, duration: 0.5)
-        sprite.run(deathColor)
-        
-        // Shake violently then freeze
-        let violentShake = SKAction.sequence([
-            SKAction.moveBy(x: -8, y: 0, duration: 0.03),
-            SKAction.moveBy(x: 16, y: 0, duration: 0.06),
-            SKAction.moveBy(x: -8, y: 0, duration: 0.03)
+        let sequence = SKAction.sequence([
+            SKAction.rotate(byAngle: -angle, duration: duration),
+            SKAction.rotate(byAngle: angle * 2, duration: duration * 2),
+            SKAction.rotate(byAngle: -angle * 2, duration: duration * 2),
+            SKAction.rotate(byAngle: angle, duration: duration),
+            SKAction.rotate(toAngle: 0, duration: duration)
         ])
-        let shakeSequence = SKAction.repeat(violentShake, count: 10)
         
-        // Ice crystals appear (optional, keeping for effect)
-        let addIce = SKAction.run { [weak self] in
-            guard let self = self else { return }
-            for _ in 0..<5 {
-                let ice = SKLabelNode(text: "☠️")
-                ice.fontSize = CGFloat.random(in: 20...30)
-                ice.position = CGPoint(x: CGFloat.random(in: -50...50), y: CGFloat.random(in: 40...80))
-                ice.alpha = 0
-                ice.zPosition = 15
-                self.addChild(ice)
-                ice.run(SKAction.sequence([SKAction.fadeIn(withDuration: 0.2), SKAction.moveBy(x: 0, y: 20, duration: 1.0)]))
+        sprite.run(sequence, withKey: "shakeNo")
+        playSFX("wrong_match.m4a") // Play sound here if not played elsewhere
+    }
+    
+    func showHearts() {
+        // Emit heart particles
+        let emitter = SKEmitterNode()
+        emitter.particleTexture = SKTexture(imageNamed: "heart")
+        emitter.particleBirthRate = 8
+        emitter.particleLifetime = 1.5
+        emitter.particlePositionRange = CGVector(dx: 100, dy: 20)
+        emitter.emissionAngle = CGFloat.pi / 2
+        emitter.emissionAngleRange = 0.4
+        emitter.particleSpeed = 100
+        emitter.particleSpeedRange = 40
+        emitter.yAcceleration = 30
+        emitter.particleAlpha = 1.0
+        emitter.particleAlphaSpeed = -0.5
+        emitter.particleScale = 0.4
+        emitter.particleScaleRange = 0.2
+        emitter.particleRotationSpeed = 1.0
+        
+        emitter.position = CGPoint(x: 0, y: 150)
+        emitter.zPosition = 60
+        addChild(emitter)
+        
+        // Auto remove
+        emitter.run(SKAction.sequence([
+            SKAction.wait(forDuration: 0.5),
+            SKAction.run { emitter.particleBirthRate = 0 },
+            SKAction.wait(forDuration: 2.0),
+            SKAction.removeFromParent()
+        ]))
+    }
+    
+    func setPanic(active: Bool) {
+        if active {
+            if childNode(withName: "sweatParticles") == nil {
+                // Add sweat drops
+                let emitter = SKEmitterNode()
+                emitter.name = "sweatParticles"
+                emitter.particleTexture = SKTexture(imageNamed: "icicle_sweat")
+                emitter.particleBirthRate = 5
+                emitter.particleLifetime = 1.0
+                emitter.particlePositionRange = CGVector(dx: 120, dy: 50)
+                // Drops falling down
+                emitter.emissionAngle = -CGFloat.pi / 2
+                emitter.emissionAngleRange = 0.3
+                emitter.particleSpeed = 80
+                emitter.yAcceleration = -100
+                emitter.particleScale = 0.5
+                emitter.particleScaleRange = 0.2
+                emitter.particleAlpha = 0.9
+                emitter.position = CGPoint(x: 0, y: 160) // Forehead level
+                emitter.zPosition = 55
+                addChild(emitter)
+                
+                // Shake slightly to indicate nervousness
+                 let nervousShake = SKAction.sequence([
+                    SKAction.moveBy(x: -2, y: 0, duration: 0.05),
+                    SKAction.moveBy(x: 4, y: 0, duration: 0.1),
+                    SKAction.moveBy(x: -2, y: 0, duration: 0.05)
+                ])
+                if action(forKey: "nervous") == nil {
+                    run(SKAction.repeatForever(nervousShake), withKey: "nervous")
+                }
             }
-        }
-        
-        sprite.run(SKAction.sequence([
-            shakeSequence,
-            addIce,
-            SKAction.wait(forDuration: 1.5), // Wait to show the dead face
-            SKAction.fadeOut(withDuration: 0.2)
-        ])) {
-            self.removeFromParent()
-            completion()
+        } else {
+            childNode(withName: "sweatParticles")?.removeFromParent()
+            removeAction(forKey: "nervous")
+            // Return to center if offset
+            // position is controlled by GameScene, so just stop the action
         }
     }
     
-    private func addDeadFace(to sprite: SKSpriteNode) {
-        let size = sprite.size
-        
-        // X eyes (Larger for "dead" effect)
-        let eyeSize = size.width * 0.12
-        let eyeOffset = size.width * 0.16
-        let eyeY = size.height * 0.08
-        
-        func createXEye() -> SKShapeNode {
-            let xNode = SKShapeNode()
-            let p = UIBezierPath()
-            p.move(to: CGPoint(x: -eyeSize/2, y: -eyeSize/2))
-            p.addLine(to: CGPoint(x: eyeSize/2, y: eyeSize/2))
-            p.move(to: CGPoint(x: eyeSize/2, y: -eyeSize/2))
-            p.addLine(to: CGPoint(x: -eyeSize/2, y: eyeSize/2))
-            xNode.path = p.cgPath
-            xNode.strokeColor = .black
-            xNode.lineWidth = 6
-            xNode.lineCap = .round
-            return xNode
-        }
-        
-        let leftX = createXEye()
-        leftX.position = CGPoint(x: -eyeOffset, y: eyeY)
-        leftX.zPosition = 30
-        sprite.addChild(leftX)
-        
-        let rightX = createXEye()
-        rightX.position = CGPoint(x: eyeOffset, y: eyeY)
-        rightX.zPosition = 30
-        sprite.addChild(rightX)
-    }
+    // Removing old deprecated freezeToDeath logic as we use lightning now
 }
 
 // MARK: - Game Scene
@@ -1495,6 +1507,13 @@ class GameScene: SKScene {
             ghostTimedOut()
         }
         
+        // Check for panic (Low Time)
+        if timeRemaining < 8.0 && timeRemaining > 0 {
+            currentGhost?.setPanic(active: true)
+        } else {
+            currentGhost?.setPanic(active: false)
+        }
+        
         // Update timer UI
         updateTimerUI()
     }
@@ -1856,7 +1875,11 @@ class GameScene: SKScene {
         currentGhost?.addClothingLayer(clothing: clothing.clothing)
         
         // Play correct match sound
+        // Play correct match sound
         playSFX("correct_match.m4a")
+        
+        // Ghost Reaction: Show Hearts
+        currentGhost?.showHearts()
         
         // Mark pattern as complete
         if let patternContainer = patternDisplay.childNode(withName: "pattern_\(currentPatternIndex)") {
@@ -1913,7 +1936,11 @@ class GameScene: SKScene {
         triggerHaptic(.error)
         
         // Play wrong match sound
-        playSFX("wrong_match.m4a")
+        // Play wrong match sound
+        // playSFX("wrong_match.m4a") // Played inside shakeHeadNo now
+        
+        // Ghost Reaction: Shake Head
+        ghost.shakeHeadNo()
         
         // Reset combo
         combo = 0
