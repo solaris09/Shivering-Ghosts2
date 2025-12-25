@@ -251,20 +251,20 @@ def main():
     ghost = draw_ghost()
     save_sprite(ghost, "ghost_standard")
     
-    # 2. Hats - Save cropped for UI consistency
-    save_cropped_clothing(draw_beanie('red'), "kirmizi_sapka")
-    save_cropped_clothing(draw_beanie('blue'), "mavi_sapka")
-    save_cropped_clothing(draw_witch_hat(), "cadi_sapkasi") 
+    # 2. Hats
+    save_sprite(draw_beanie('red'), "kirmizi_sapka")
+    save_sprite(draw_beanie('blue'), "mavi_sapka")
+    save_sprite(draw_witch_hat(), "cadi_sapkasi") # Purple/Witch
     
     # 3. Scarves
-    save_cropped_clothing(draw_scarf('red'), "kirmizi_atki")
-    save_cropped_clothing(draw_scarf('blue'), "mavi_atki")
-    save_cropped_clothing(draw_scarf('green'), "yesil_atki")
+    save_sprite(draw_scarf('red'), "kirmizi_atki")
+    save_sprite(draw_scarf('blue'), "mavi_atki")
+    save_sprite(draw_scarf('green'), "yesil_atki")
     
     # 4. Sweaters
-    save_cropped_clothing(draw_sweater('purple'), "mor_kazak")
-    save_cropped_clothing(draw_sweater('orange'), "turuncu_kazak")
-    save_cropped_clothing(draw_sweater('green'), "yesil_kazak")
+    save_sprite(draw_sweater('purple'), "mor_kazak")
+    save_sprite(draw_sweater('orange'), "turuncu_kazak")
+    save_sprite(draw_sweater('green'), "yesil_kazak")
     
     print("✅ Done!")
 
