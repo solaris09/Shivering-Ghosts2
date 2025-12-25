@@ -472,13 +472,15 @@ class GhostNode: SKNode {
         childNode(withName: "leafParticles")?.removeFromParent()
         childNode(withName: "rainParticles")?.removeFromParent()
         
+        let size = scene?.size ?? CGSize(width: 400, height: 800)
+        
         // 1. Snowflakes (More realistic: smaller, denser, floaty)
         let snowEmitter = SKEmitterNode()
         snowEmitter.name = "coldParticles"
         snowEmitter.particleTexture = SKTexture(imageNamed: "snowflake")
-        snowEmitter.particleBirthRate = 30 // Denser
+        snowEmitter.particleBirthRate = 30
         snowEmitter.particleLifetime = 7.0
-        snowEmitter.particlePositionRange = CGVector(dx: size.width, dy: 100) // Full width
+        snowEmitter.particlePositionRange = CGVector(dx: size.width, dy: 100)
         snowEmitter.emissionAngle = -CGFloat.pi / 2 - 0.2
         snowEmitter.emissionAngleRange = CGFloat.pi / 4
         snowEmitter.particleSpeed = 50
@@ -487,14 +489,15 @@ class GhostNode: SKNode {
         snowEmitter.yAcceleration = -10
         snowEmitter.particleAlpha = 0.9
         snowEmitter.particleAlphaRange = 0.2
-        snowEmitter.particleScale = 0.3 // Many small flakes
+        snowEmitter.particleScale = 0.3
         snowEmitter.particleScaleRange = 0.2
         snowEmitter.particleRotationSpeed = 1.0
-        snowEmitter.position = CGPoint(x: size.width / 2, y: size.height + 50)
-        snowEmitter.zPosition = 50 // In front of everything
+        // Position relative to ghost center (0,0) -> Top of screen slightly adjustable
+        snowEmitter.position = CGPoint(x: 0, y: size.height * 0.5) 
+        snowEmitter.zPosition = 50
         addChild(snowEmitter)
         
-        // 2. Wind Leaves (Fewer, background accent)
+        // 2. Wind Leaves
         let leafEmitter = SKEmitterNode()
         leafEmitter.name = "leafParticles"
         leafEmitter.particleSize = CGSize(width: 15, height: 15)
@@ -509,25 +512,25 @@ class GhostNode: SKNode {
         leafEmitter.particleRotationSpeed = 2.0
         leafEmitter.particleAlpha = 0.7
         leafEmitter.particleColorSequence = SKKeyframeSequence(keyframeValues: [UIColor.brown, UIColor.orange, UIColor.yellow], times: [0, 0.5, 1])
-        leafEmitter.position = CGPoint(x: size.width, y: size.height)
+        leafEmitter.position = CGPoint(x: 0, y: size.height * 0.4)
         leafEmitter.zPosition = 49
         addChild(leafEmitter)
         
-        // 3. Occasional Rain (More realistic: fast, thin, translucent streaks)
+        // 3. Occasional Rain
         if Bool.random() {
             let rainEmitter = SKEmitterNode()
             rainEmitter.name = "rainParticles"
-            rainEmitter.particleTexture = nil // Use shape
-            rainEmitter.particleSize = CGSize(width: 2, height: 45) // Thin streaks
-            rainEmitter.particleColor = UIColor(white: 0.9, alpha: 0.35) // Translucent
-            rainEmitter.particleBirthRate = 80 // Heavy rain
+            rainEmitter.particleTexture = nil
+            rainEmitter.particleSize = CGSize(width: 2, height: 45)
+            rainEmitter.particleColor = UIColor(white: 0.9, alpha: 0.35)
+            rainEmitter.particleBirthRate = 80
             rainEmitter.particleLifetime = 2.0
             rainEmitter.particlePositionRange = CGVector(dx: size.width + 100, dy: 0)
-            rainEmitter.emissionAngle = -CGFloat.pi / 2 - 0.1 // Slight wind
-            rainEmitter.particleSpeed = 900 // Fast!
+            rainEmitter.emissionAngle = -CGFloat.pi / 2 - 0.1
+            rainEmitter.particleSpeed = 900
             rainEmitter.particleSpeedRange = 200
-            rainEmitter.position = CGPoint(x: size.width / 2, y: size.height + 100)
-            rainEmitter.zPosition = 51 // Most front
+            rainEmitter.position = CGPoint(x: 0, y: size.height * 0.6)
+            rainEmitter.zPosition = 51
             addChild(rainEmitter)
         }
     }
