@@ -497,21 +497,29 @@ class GhostNode: SKNode {
         addChild(snowEmitter)
         
         // 2. Wind Leaves
+        // 2. Wind Leaves
         let leafEmitter = SKEmitterNode()
         leafEmitter.name = "leafParticles"
-        leafEmitter.particleSize = CGSize(width: 15, height: 15)
-        leafEmitter.particleColor = .orange
-        leafEmitter.particleColorBlendFactor = 1.0
-        leafEmitter.particleBirthRate = 0.5
-        leafEmitter.particleLifetime = 8.0
+        leafEmitter.particleTexture = SKTexture(imageNamed: "leaf") // Use the actual leaf asset
+        leafEmitter.particleColor = .white // Let texture color show through mostly
+        leafEmitter.particleColorBlendFactor = 0.0
+        leafEmitter.particleBirthRate = 0.8
+        leafEmitter.particleLifetime = 10.0
         leafEmitter.particlePositionRange = CGVector(dx: size.width, dy: 50)
-        leafEmitter.emissionAngle = -CGFloat.pi / 2 - 0.5
-        leafEmitter.particleSpeed = 40
-        leafEmitter.xAcceleration = -20
-        leafEmitter.particleRotationSpeed = 2.0
-        leafEmitter.particleAlpha = 0.7
-        leafEmitter.particleColorSequence = SKKeyframeSequence(keyframeValues: [UIColor.brown, UIColor.orange, UIColor.yellow], times: [0, 0.5, 1])
-        leafEmitter.position = CGPoint(x: 0, y: size.height * 0.4)
+        leafEmitter.emissionAngle = -CGFloat.pi / 2 - 0.4
+        leafEmitter.emissionAngleRange = 0.5 // More spread
+        leafEmitter.particleSpeed = 60
+        leafEmitter.particleSpeedRange = 20
+        leafEmitter.xAcceleration = -15
+        leafEmitter.yAcceleration = -5
+        leafEmitter.particleRotation = 0
+        leafEmitter.particleRotationRange = CGFloat.pi * 2
+        leafEmitter.particleRotationSpeed = 1.5 // Fluttering
+        leafEmitter.particleScale = 0.4
+        leafEmitter.particleScaleRange = 0.2
+        leafEmitter.particleAlpha = 0.9
+        leafEmitter.particleAlphaRange = 0.2
+        leafEmitter.position = CGPoint(x: 0, y: size.height * 0.6) // Start higher
         leafEmitter.zPosition = 49
         addChild(leafEmitter)
         

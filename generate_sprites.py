@@ -241,6 +241,30 @@ def draw_rare_ghost():
     
     return img
 
+def draw_leaf():
+    """Draw a simple autumn leaf"""
+    # Size 64x64 is enough for particle
+    img = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Orange/Brown color
+    color = (211, 84, 0, 255) # Pumpkin
+    darker = (160, 64, 0, 255)
+    
+    # Shape: teardropish
+    # x,y points
+    points = [(32, 5), (55, 20), (45, 50), (32, 60), (19, 50), (9, 20)]
+    draw.polygon(points, fill=color, outline=darker)
+    
+    # Veins
+    draw.line([(32, 5), (32, 60)], fill=darker, width=2)
+    draw.line([(32, 35), (50, 25)], fill=darker, width=1)
+    draw.line([(32, 35), (14, 25)], fill=darker, width=1)
+    draw.line([(32, 50), (40, 45)], fill=darker, width=1)
+    draw.line([(32, 50), (24, 45)], fill=darker, width=1)
+    
+    return img
+
 def draw_beanie(color_name):
     """Draw a beanie that fits the ghost head"""
     img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
@@ -382,6 +406,9 @@ def main():
     save_sprite(draw_sweater('purple'), "mor_kazak")
     save_sprite(draw_sweater('orange'), "turuncu_kazak")
     save_sprite(draw_sweater('green'), "yesil_kazak")
+    
+    # 5. Effects
+    save_sprite(draw_leaf(), "leaf")
     
     print("✅ Done!")
 
