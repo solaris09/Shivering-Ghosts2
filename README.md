@@ -33,7 +33,10 @@
 ### Features
 - ✅ Fast, intuitive outfit dressing (3 slots: beanie, scarf, sweater)
 - ✅ Drag & Drop / Tap controls
-- ✅ Outfit matching and scoring system
+- ✅ **Dynamic Weather**: Sudden blizzards (Storm Mode) increase difficulty and reward! 🌪️
+- ✅ **Power-ups**: Coffee (Time Freeze), Campfire (Instant Warmth), Magnet (Auto Match) ☕🔥🧲
+- ✅ **Ghost Reactions**: Ghosts shake their head at wrong items, show hearts for correct ones, and sweat when time is low! 😰❤️
+- ✅ **Shocking Ending**: Ghosts get struck by lightning and charred if time runs out! ⚡️☠️
 - ✅ Different ghost types and rarity (Standard, Baby, Picky, Rare)
 - ✅ In-game **Debug Tuner** for visual adjustments (DebugTuner.swift)
 - ✅ Sound effects, particles, and responsive animations
@@ -45,6 +48,8 @@
   - **Baby**: simpler patterns, 0.8x score.
   - **Picky**: strict — mistakes can end the round, higher multipliers.
   - **Rare**: longer patterns; higher reward and special outfits.
+- **Power-ups**: Spawn rarely; tap to activate special effects.
+- **Storm Mode**: Random heavy weather events that speed up gameplay.
 - **Scoring**: base points for a correct outfit; streaks and rarity multipliers increase score.
 - **Outfit Collection**: Successful matches may award outfits or unlock cosmetic variations.
 
@@ -55,6 +60,7 @@
 ### Assets (where to look)
 - Ghost sprites: `Shivering Ghosts/Assets.xcassets/ghost_*.imageset`
 - Outfit sprites: `hat_*.imageset`, `scarf_*.imageset`, `sweater_*.imageset`
+- Power-ups/Effects: `powerup_*.imageset`, `icicle_sweat`, `heart`
 - UI: `button_green`, `button_blue`, `button_red`, `heart.imageset`
 - Backgrounds & particles: `background_night.imageset`, `snowflake.imageset`
 - Sounds: see `TASKS.md` for expected files (e.g., `correct_match.mp3`, `ghost_happy.mp3`, `game_music.mp3`)
@@ -117,7 +123,10 @@ Dress cute, chilly ghosts with a beanie, scarf and sweater — fast, cozy puzzle
 ### Özellikler
 - ✅ Hızlı ve sezgisel kıyafet giydirme (3 yuva: bere, atkı, kazak)
 - ✅ Sürükle & Bırak / Dokunma kontrolleri
-- ✅ Kıyafet eşleme ve puanlama sistemi
+- ✅ **Dinamik Hava**: Aniden bastıran fırtına (Blizzard) heyecanı artırır! 🌪️
+- ✅ **Güçlendiriciler**: Kahve (Zamanı Dondur), Kamp Ateşi (Anında Isıt), Mıknatıs (Oto Eşle) ☕🔥🧲
+- ✅ **Hayalet Tepkileri**: Yanlışta kafa sallama, doğruda kalp saçma, süre azalınca terleme! 😰❤️
+- ✅ **Şok Edici Son**: Süre biterse hayalete yıldırım çarpar ve kömürleşir! ⚡️☠️
 - ✅ Farklı hayalet türleri ve nadirlikler (Standard, Baby, Picky, Rare)
 - ✅ Oyun içi **Debug Tuner** ile görsel ince ayar (DebugTuner.swift)
 - ✅ Ses efektleri, parçacıklar ve akıcı animasyonlar
