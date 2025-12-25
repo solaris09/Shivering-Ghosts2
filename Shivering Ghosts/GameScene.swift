@@ -1703,37 +1703,18 @@ class GameScene: SKScene {
         itemsToSpawn.shuffle()
         
         let count = itemsToSpawn.count
-        // Adaptive sizing and spacing
-        var itemSize: CGFloat
-        var spacing: CGFloat
-        switch count {
-        case 6:
-            itemSize = 55
-            spacing = 70
-        case 5:
-            itemSize = 58
-            spacing = 75
-        case 4:
-            itemSize = 60
-            spacing = 80
-        default:
-            itemSize = 150 // Set to 150 as requested
-            spacing = 170
-        }
-
-        // Ensure it fits within screen width -- DISABLED scaling to force large size
-        // let totalWidth = CGFloat(max(0, count - 1)) * spacing + itemSize
-        // let maxWidth = size.width * 0.9
-        /*
-        if totalWidth > maxWidth {
-            let scale = maxWidth / totalWidth
-            itemSize *= scale
-            spacing *= scale
-        }
-        */
-
-        let startX = size.width / 2 - CGFloat(count - 1) * spacing / 2
-        let itemY = size.height * 0.15
+        
+        // Fixed large size for all items
+        let itemSize: CGFloat = 100
+        
+        // Calculate spacing to fit screen width while centering
+        let screenPadding: CGFloat = 40
+        let availableWidth = size.width - (screenPadding * 2)
+        let spacing: CGFloat = min(availableWidth / CGFloat(max(count, 1)), 110)
+        
+        let totalWidth = CGFloat(max(0, count - 1)) * spacing
+        let startX = (size.width - totalWidth) / 2
+        let itemY: CGFloat = 80 // Fixed Y position near bottom
         
         for (index, clothing) in itemsToSpawn.enumerated() {
             let clothingNode = ClothingItemNode(clothing: clothing, size: itemSize)
