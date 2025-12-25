@@ -182,7 +182,9 @@ class ClothingItemNode: SKNode {
         if let imgName = clothing.imageName {
             let texture = SKTexture(imageNamed: imgName)
             let sprite = SKSpriteNode(texture: texture)
-            sprite.size = CGSize(width: size, height: size)
+            // Maintain aspect ratio
+            let aspectRatio = texture.size().width / texture.size().height
+            sprite.size = CGSize(width: size * aspectRatio, height: size)
             sprite.position = .zero
             addChild(sprite)
         } else {
@@ -1699,14 +1701,16 @@ class GameScene: SKScene {
             spacing = 170
         }
 
-        // Ensure it fits within screen width
+        // Ensure it fits within screen width -- DISABLED scaling to force large size
         let totalWidth = CGFloat(max(0, count - 1)) * spacing + itemSize
         let maxWidth = size.width * 0.9
+        /*
         if totalWidth > maxWidth {
             let scale = maxWidth / totalWidth
             itemSize *= scale
             spacing *= scale
         }
+        */
 
         let startX = size.width / 2 - CGFloat(count - 1) * spacing / 2
         let itemY = size.height * 0.15
