@@ -1709,7 +1709,7 @@ class GameScene: SKScene {
         
         itemsToSpawn.shuffle()
         
-        let count = itemsToSpawn.count
+
         
         // Grid Layout: 2 Rows
         // Top Row: 2 items (Indices 3, 4)
