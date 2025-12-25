@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcworkspace
+*.xcuserdata
+*.xcuserstate
+xcuserdata/
+*.xcdebugger
+*.xcuserdatad
+*.moved-aside
+*.xccheckout
+*.xcworkspace/xcuserdata
+*.xcarchive
+
+# SwiftPM
+.build/
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Build
+
+# Other
+*.swp
+.vscode/
+.idea/
