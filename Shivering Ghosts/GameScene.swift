@@ -850,6 +850,66 @@ class GhostNode: SKNode {
         }
     }
     
+    func strikeWithLightning(completion: @escaping () -> Void) {
+        stopShivering()
+        
+        guard let sprite = childNode(withName: "ghostSprite") as? SKSpriteNode else {
+            completion()
+            return
+        }
+        
+        // 1. Visual Flash (Lightning)
+        let flashNode = SKShapeNode(rectOf: UIScreen.main.bounds.size)
+        flashNode.fillColor = .white
+        flashNode.strokeColor = .clear
+        flashNode.alpha = 0
+        flashNode.zPosition = 100
+        addChild(flashNode)
+        
+        // Flash animation
+        let flashAction = SKAction.sequence([
+            SKAction.fadeAlpha(to: 1.0, duration: 0.1),
+            SKAction.wait(forDuration: 0.05),
+            SKAction.fadeAlpha(to: 0.0, duration: 0.1),
+            SKAction.wait(forDuration: 0.05),
+            SKAction.fadeAlpha(to: 0.8, duration: 0.1),
+            SKAction.fadeAlpha(to: 0.0, duration: 0.2),
+            SKAction.removeFromParent()
+        ])
+        
+        // 2. Change Shape to Dead Ghost
+        let changeShapeAction = SKAction.run {
+             // Change texture to Dead Ghost
+             sprite.texture = SKTexture(imageNamed: "ghost_dead")
+             sprite.size = CGSize(width: 300, height: 400) // Ensure size matches standard
+             // Remove clothing as it burned off
+             sprite.children.filter { $0.name?.hasPrefix("clothing_") ?? false }.forEach { $0.removeFromParent() }
+             // Remove face elements (mouth/eyes) as they are baked into dead sprite
+             sprite.children.filter { $0.name == "mouth" || $0.name == "leftEye" || $0.name == "rightEye" }.forEach { $0.removeFromParent() }
+             self.childNode(withName: "leftEye")?.removeFromParent()
+             self.childNode(withName: "rightEye")?.removeFromParent()
+             self.childNode(withName: "mouth")?.removeFromParent()
+        }
+        
+        // 3. Shake Effect
+        let shakeAction = SKAction.sequence([
+            SKAction.moveBy(x: -20, y: 0, duration: 0.05),
+            SKAction.moveBy(x: 40, y: 0, duration: 0.1),
+            SKAction.moveBy(x: -20, y: 0, duration: 0.05)
+        ])
+        
+        flashNode.run(flashAction)
+        
+        sprite.run(SKAction.sequence([
+             SKAction.wait(forDuration: 0.1), // Wait for first flash peak
+             changeShapeAction,
+             SKAction.repeat(shakeAction, count: 3),
+             SKAction.wait(forDuration: 1.0)
+        ])) {
+            completion()
+        }
+    }
+    
     func freezeToDeath(completion: @escaping () -> Void) {
         // Ghost freezes/dies - timeout animation
         stopShivering()
@@ -1465,9 +1525,12 @@ class GameScene: SKScene {
         // Play timeout sound if available
         playSFX("timeout.m4a")
         
-        // Ghost freezes to death
-        currentGhost?.freezeToDeath { [weak self] in
-            self?.showGameOver(reason: "Ghost froze to death! 🥶")
+        // Play timeout sound if available
+        playSFX("timeout.m4a")
+        
+        // Ghost Gets Struck by Lightning! ⚡️
+        currentGhost?.strikeWithLightning { [weak self] in
+            self?.showGameOver(reason: "Ghost was struck by lightning! ⚡️")
         }
         
         // Clear clothing items

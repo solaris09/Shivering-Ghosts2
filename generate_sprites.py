@@ -241,6 +241,62 @@ def draw_rare_ghost():
     
     return img
 
+def draw_dead_ghost():
+    """Draw a dead/charred ghost for game over"""
+    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Charred Color (Dark Gray)
+    body_color = (80, 80, 90, 255) 
+    outline = (20, 20, 30, 255)
+    
+    # 1. EXACT SAME BODY SHAPE
+    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
+    draw.rectangle([30, 140, 270, 320], fill=body_color)
+    draw.line([30, 140, 30, 320], fill=outline, width=8)
+    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    
+    wave_y = 320
+    wave_h = 40
+    points = [(30, wave_y)]
+    for i in range(1, 7):
+        x = 30 + (240 * i / 6)
+        y = wave_y + (wave_h if i % 2 != 0 else 0)
+        points.append((x, y))
+    
+    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
+    draw.polygon(fill_points, fill=body_color)
+    for i in range(len(points)-1):
+        draw.line([points[i], points[i+1]], fill=outline, width=8)
+
+    # 2. UNIQUE FEATURES
+    # X-Eyes
+    eye_y = 130
+    def draw_x_eye(cx, cy):
+        s = 15
+        draw.line([cx-s, cy-s, cx+s, cy+s], fill=(20, 20, 20, 255), width=6)
+        draw.line([cx+s, cy-s, cx-s, cy+s], fill=(20, 20, 20, 255), width=6)
+
+    draw_x_eye(100, eye_y+20)
+    draw_x_eye(200, eye_y+20)
+
+    # Mouth (Sad/Frown)
+    mouth_y = 180
+    draw.arc([130, mouth_y, 170, mouth_y+20], start=180, end=0, fill=outline, width=5)
+    
+    # Soot marks
+    for _ in range(5):
+        import random
+        rx = random.randint(50, 250)
+        ry = random.randint(50, 280)
+        draw.ellipse([rx, ry, rx+10, ry+10], fill=(40, 40, 40, 180))
+    
+    # Arms
+    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
+    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
+    
+    return img
+
 def draw_leaf():
     """Draw a simple autumn leaf"""
     # Size 64x64 is enough for particle
@@ -391,6 +447,7 @@ def main():
     
     save_sprite(draw_baby_ghost(), "ghost_baby")
     save_sprite(draw_rare_ghost(), "ghost_rare")
+    save_sprite(draw_dead_ghost(), "ghost_dead")
     
     # 2. Hats
     save_sprite(draw_beanie('red'), "kirmizi_sapka")
