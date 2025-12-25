@@ -1385,6 +1385,10 @@ class GameScene: SKScene {
         timerLabel?.removeFromParent()
         timerBar?.removeFromParent()
         childNode(withName: "timerBarBg")?.removeFromParent()
+        
+        // Remove old ghost (dead or otherwise)
+        currentGhost?.removeFromParent()
+        childNode(withName: "ghostSprite")?.removeFromParent() // Extra check since we sometimes look up by name
     }
     
     private func spawnNewGhost() {
