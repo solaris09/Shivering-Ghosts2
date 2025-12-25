@@ -297,6 +297,111 @@ def draw_dead_ghost():
     
     return img
 
+    return img
+
+def draw_dead_baby_ghost():
+    """Draw a dead baby ghost (charred + pacifier)"""
+    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Charred Baby Color (Dark Gray/Blueish)
+    body_color = (80, 85, 95, 255) 
+    outline = (20, 20, 30, 255)
+    
+    # 1. BODY
+    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
+    draw.rectangle([30, 140, 270, 320], fill=body_color)
+    draw.line([30, 140, 30, 320], fill=outline, width=8)
+    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    
+    wave_y = 320
+    wave_h = 40
+    points = [(30, wave_y)]
+    for i in range(1, 7):
+        x = 30 + (240 * i / 6)
+        y = wave_y + (wave_h if i % 2 != 0 else 0)
+        points.append((x, y))
+    
+    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
+    draw.polygon(fill_points, fill=body_color)
+    for i in range(len(points)-1):
+        draw.line([points[i], points[i+1]], fill=outline, width=8)
+
+    # 2. X-EYES (Slightly lower/cuter?)
+    eye_y = 135
+    def draw_x_eye(cx, cy):
+        s = 15
+        draw.line([cx-s, cy-s, cx+s, cy+s], fill=(20, 20, 20, 255), width=6)
+        draw.line([cx+s, cy-s, cx-s, cy+s], fill=(20, 20, 20, 255), width=6)
+    draw_x_eye(90, eye_y+15)
+    draw_x_eye(200, eye_y+15)
+
+    # 3. PACIFIER (Burnt)
+    mouth_y = 175
+    draw.ellipse([130, mouth_y, 170, mouth_y+30], fill=(100, 50, 50, 255), outline=outline, width=3)
+    draw.arc([135, mouth_y+10, 165, mouth_y+40], start=0, end=180, fill=outline, width=3)
+
+    # Arms
+    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
+    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
+    
+    return img
+
+def draw_dead_rare_ghost():
+    """Draw a dead rare ghost (charred + broken stars)"""
+    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Charred Rare Color (Dark Gray/Brownish)
+    body_color = (90, 85, 70, 255) 
+    outline = (30, 25, 20, 255)
+    
+    # 1. BODY
+    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
+    draw.rectangle([30, 140, 270, 320], fill=body_color)
+    draw.line([30, 140, 30, 320], fill=outline, width=8)
+    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    
+    wave_y = 320
+    wave_h = 40
+    points = [(30, wave_y)]
+    for i in range(1, 7):
+        x = 30 + (240 * i / 6)
+        y = wave_y + (wave_h if i % 2 != 0 else 0)
+        points.append((x, y))
+    
+    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
+    draw.polygon(fill_points, fill=body_color)
+    for i in range(len(points)-1):
+        draw.line([points[i], points[i+1]], fill=outline, width=8)
+
+    # 2. BROKEN STAR EYES (X over star?)
+    eye_y = 130
+    def draw_star(cx, cy, size, color):
+        pts = []
+        for i in range(10):
+            angle = math.pi/2 + i * math.pi/5
+            r = size if i % 2 == 0 else size/2.5
+            pts.append((cx + math.cos(angle)*r, cy - math.sin(angle)*r))
+        draw.polygon(pts, fill=outline) 
+        # Just use simple X for dead version but maybe yellow-ish lines
+        s = 15
+        draw.line([cx-s, cy-s, cx+s, cy+s], fill=(60, 50, 0, 255), width=6)
+        draw.line([cx+s, cy-s, cx-s, cy+s], fill=(60, 50, 0, 255), width=6)
+
+    draw_star(100, eye_y+20, 0, None)
+    draw_star(200, eye_y+20, 0, None)
+
+    # Mouth (Frown)
+    mouth_y = 180
+    draw.arc([130, mouth_y, 170, mouth_y+20], start=180, end=0, fill=outline, width=5)
+    
+    # Arms
+    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
+    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
+    
+    return img
+
 def draw_leaf():
     """Draw a simple autumn leaf"""
     # Size 64x64 is enough for particle
@@ -448,6 +553,8 @@ def main():
     save_sprite(draw_baby_ghost(), "ghost_baby")
     save_sprite(draw_rare_ghost(), "ghost_rare")
     save_sprite(draw_dead_ghost(), "ghost_dead")
+    save_sprite(draw_dead_baby_ghost(), "ghost_baby_dead")
+    save_sprite(draw_dead_rare_ghost(), "ghost_rare_dead")
     
     # 2. Hats
     save_sprite(draw_beanie('red'), "kirmizi_sapka")

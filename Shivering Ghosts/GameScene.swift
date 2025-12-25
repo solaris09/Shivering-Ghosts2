@@ -879,8 +879,15 @@ class GhostNode: SKNode {
         
         // 2. Change Shape to Dead Ghost
         let changeShapeAction = SKAction.run {
-             // Change texture to Dead Ghost
-             sprite.texture = SKTexture(imageNamed: "ghost_dead")
+             // Change texture to Dead Ghost based on type
+             let deadImageName: String
+             switch self.ghostType {
+             case .baby: deadImageName = "ghost_baby_dead"
+             case .rare: deadImageName = "ghost_rare_dead"
+             default: deadImageName = "ghost_dead"
+             }
+             
+             sprite.texture = SKTexture(imageNamed: deadImageName)
              sprite.size = CGSize(width: 300, height: 400) // Ensure size matches standard
              // Remove clothing as it burned off
              sprite.children.filter { $0.name?.hasPrefix("clothing_") ?? false }.forEach { $0.removeFromParent() }
