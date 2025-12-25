@@ -82,24 +82,24 @@ struct ClothingItem: Equatable {
         switch type {
         case .hat:
             switch color {
-            case .red: return "bere_kirmizi"
-            case .blue: return "bere_mavi"
-            case .purple: return "bere_cadi"
-            default: return "bere_kirmizi"
+            case .red: return "kirmizi_sapka"
+            case .blue: return "mavi_sapka"
+            case .purple: return "cadi_sapkasi"
+            default: return "kirmizi_sapka"
             }
         case .scarf:
             switch color {
-            case .red: return "atki_kirmizi"
-            case .blue: return "atki_mavi"
-            case .green: return "atki_yesil"
-            default: return "atki_kirmizi"
+            case .red: return "kirmizi_atki"
+            case .blue: return "mavi_atki"
+            case .green: return "yesil_atki"
+            default: return "kirmizi_atki"
             }
         case .sweater:
             switch color {
-            case .purple: return "kazak_mor"
-            case .orange: return "kazak_turuncu"
-            case .green: return "kazak_yesil"
-            default: return "kazak_yesil"
+            case .purple: return "mor_kazak"
+            case .orange: return "turuncu_kazak"
+            case .green: return "yesil_kazak"
+            default: return "yesil_kazak"
             }
         }
     }
