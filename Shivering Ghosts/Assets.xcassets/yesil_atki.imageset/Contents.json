@@ -1,17 +1,17 @@
 {
   "images": [
     {
-      "filename": "ghost_standard.png",
+      "filename": "yesil_atki.png",
       "idiom": "universal",
       "scale": "1x"
     },
     {
-      "filename": "ghost_standard@2x.png",
+      "filename": "yesil_atki@2x.png",
       "idiom": "universal",
       "scale": "2x"
     },
     {
-      "filename": "ghost_standard@3x.png",
+      "filename": "yesil_atki@3x.png",
       "idiom": "universal",
       "scale": "3x"
     }

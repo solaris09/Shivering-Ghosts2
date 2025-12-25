@@ -1,17 +1,17 @@
 {
   "images": [
     {
-      "filename": "ghost_standard.png",
+      "filename": "kirmizi_sapka.png",
       "idiom": "universal",
       "scale": "1x"
     },
     {
-      "filename": "ghost_standard@2x.png",
+      "filename": "kirmizi_sapka@2x.png",
       "idiom": "universal",
       "scale": "2x"
     },
     {
-      "filename": "ghost_standard@3x.png",
+      "filename": "kirmizi_sapka@3x.png",
       "idiom": "universal",
       "scale": "3x"
     }

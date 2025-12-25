@@ -597,21 +597,9 @@ class GhostNode: SKNode {
             let texture = SKTexture(imageNamed: imgName)
             let spriteNode = SKSpriteNode(texture: texture)
             spriteNode.zPosition = 20
-            // Pozisyonlama: şapka yukarı, atkı ortada, kazak aşağıda
-            switch item.type {
-            case .hat:
-                // Hat sits lower on the head and is wider
-                spriteNode.position = CGPoint(x: 0, y: sprite.size.height * 0.24)
-                spriteNode.size = CGSize(width: sprite.size.width * 1.0, height: sprite.size.height * 0.45)
-            case .scarf:
-                // Scarf sits below the face (neck area)
-                spriteNode.position = CGPoint(x: 0, y: -sprite.size.height * 0.08)
-                spriteNode.size = CGSize(width: sprite.size.width * 0.9, height: sprite.size.height * 0.25)
-            case .sweater:
-                // Sweater sits on the body
-                spriteNode.position = CGPoint(x: 0, y: -sprite.size.height * 0.32)
-                spriteNode.size = CGSize(width: sprite.size.width * 0.85, height: sprite.size.height * 0.35)
-            }
+            // Assets are generated to match the ghost frame exactly
+            spriteNode.position = .zero
+            spriteNode.size = sprite.size
             container.addChild(spriteNode)
         } else {
             // ...eski vektör çizim kodu buraya alınabilir veya boş bırakılabilir...
