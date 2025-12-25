@@ -1591,13 +1591,15 @@ class GameScene: SKScene {
             container.position = CGPoint(x: startX + CGFloat(index) * spacing, y: 0)
             container.name = "pattern_\(index)"
             
-            let size: CGFloat = 50
+            let size: CGFloat = 70
             
             // Clothing icon
             if let imgName = item.imageName {
                 let texture = SKTexture(imageNamed: imgName)
                 let iconSprite = SKSpriteNode(texture: texture)
-                iconSprite.size = CGSize(width: size, height: size)
+                // Maintain aspect ratio for the icons
+                let aspectRatio = texture.size().width / texture.size().height
+                iconSprite.size = CGSize(width: size * aspectRatio, height: size)
                 container.addChild(iconSprite)
             } else {
                 let icon = SKLabelNode(text: item.type.emoji)
@@ -1693,8 +1695,8 @@ class GameScene: SKScene {
             itemSize = 60
             spacing = 80
         default:
-            itemSize = 65
-            spacing = 85
+            itemSize = 90
+            spacing = 90
         }
 
         // Ensure it fits within screen width
