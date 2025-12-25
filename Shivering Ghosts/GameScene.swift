@@ -207,7 +207,7 @@ class ClothingItemNode: SKNode {
         zPosition = 100
         
         // Play drag sound if available
-        playSFX("yarn_drag.mp3")
+        playSFX("yarn_drag.m4a")
     }
     
     func stopDragging() {
@@ -433,7 +433,7 @@ class GhostNode: SKNode {
         addColdParticles()
         
         // Play shivering sound if available - Low Volume
-        if CollectionManager.shared.settings.soundEffectsEnabled, let url = Bundle.main.url(forResource: "shiver", withExtension: "mp3") {
+        if CollectionManager.shared.settings.soundEffectsEnabled, let url = Bundle.main.url(forResource: "shiver", withExtension: "m4a") {
             let shiverNode = SKAudioNode(url: url)
             shiverNode.autoplayLooped = false
             shiverNode.name = "audio_shiver"
@@ -591,7 +591,7 @@ class GhostNode: SKNode {
         }
         
         // Play pop sound
-        playSFX("pop.mp3")
+        playSFX("pop.m4a")
     }
     
     private func createClothingLayer(for item: ClothingItem, index: Int, total: Int, on sprite: SKSpriteNode) -> SKNode {
@@ -851,7 +851,7 @@ class GhostNode: SKNode {
         }
         
         // Play freeze/death sound if available
-        playSFX("freeze_death.mp3")
+        playSFX("freeze_death.m4a")
         
         // Turn PURPLE and dark
         // Using color blend (might cause border artifacts but requested by user)
@@ -1004,7 +1004,7 @@ class GameScene: SKScene {
     
     // MARK: - Audio Handling
     private func playBackgroundMusic() {
-        guard let url = Bundle.main.url(forResource: "game_music", withExtension: "mp3") else { return }
+        guard let url = Bundle.main.url(forResource: "game_music", withExtension: "m4a") else { return }
         
         do {
             backgroundMusicPlayer = try AVAudioPlayer(contentsOf: url)
@@ -1022,7 +1022,7 @@ class GameScene: SKScene {
     }
     
     private func playWindAmbience() {
-        guard let url = Bundle.main.url(forResource: "wind_ambience", withExtension: "mp3") else { return }
+        guard let url = Bundle.main.url(forResource: "wind_ambience", withExtension: "m4a") else { return }
         
         do {
             windSoundPlayer = try AVAudioPlayer(contentsOf: url)
@@ -1453,7 +1453,7 @@ class GameScene: SKScene {
         gameState = .failure
         
         // Play timeout sound if available
-        playSFX("timeout.mp3")
+        playSFX("timeout.m4a")
         
         // Ghost freezes to death
         currentGhost?.freezeToDeath { [weak self] in
@@ -1774,7 +1774,7 @@ class GameScene: SKScene {
         currentGhost?.addClothingLayer(clothing: clothing.clothing)
         
         // Play correct match sound
-        playSFX("correct_match.mp3")
+        playSFX("correct_match.m4a")
         
         // Mark pattern as complete
         if let patternContainer = patternDisplay.childNode(withName: "pattern_\(currentPatternIndex)") {
@@ -1831,7 +1831,7 @@ class GameScene: SKScene {
         triggerHaptic(.error)
         
         // Play wrong match sound
-        playSFX("wrong_match.mp3")
+        playSFX("wrong_match.m4a")
         
         // Reset combo
         combo = 0
@@ -1869,7 +1869,7 @@ class GameScene: SKScene {
         ghostsWarmed += 1
         
         // Play happy ghost sound ("Wuuu~")
-        playSFX("ghost_happy.mp3")
+        playSFX("ghost_happy.m4a")
         
         // Bonus for completion with ghost type multiplier
         let baseBonus = 50 * level
