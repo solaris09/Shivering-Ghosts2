@@ -1711,22 +1711,39 @@ class GameScene: SKScene {
         
         let count = itemsToSpawn.count
         
-        // Fixed large size for all items
+        // Grid Layout: 2 Rows
+        // Top Row: 2 items (Indices 3, 4)
+        // Bottom Row: 3 items (Indices 0, 1, 2)
+        
+        // Fixed large size
         let itemSize: CGFloat = 130
+        let spacing: CGFloat = 140
         
-        // Calculate spacing to fit screen width while centering
-        let screenPadding: CGFloat = 40
-        let availableWidth = size.width - (screenPadding * 2)
-        let spacing: CGFloat = min(availableWidth / CGFloat(max(count, 1)), 110)
-        
-        let totalWidth = CGFloat(max(0, count - 1)) * spacing
-        let startX = (size.width - totalWidth) / 2
-        let itemY: CGFloat = 80 // Fixed Y position near bottom
+        let bottomY: CGFloat = 80
+        let topY: CGFloat = bottomY + 110 // Spacing between rows
         
         for (index, clothing) in itemsToSpawn.enumerated() {
             let clothingNode = ClothingItemNode(clothing: clothing, size: itemSize)
-            let xPos = startX + CGFloat(index) * spacing
-            clothingNode.position = CGPoint(x: xPos, y: itemY)
+            
+            var xPos: CGFloat = 0
+            var yPos: CGFloat = 0
+            
+            if index < 3 {
+                // Bottom Row (3 items)
+                // Center them: index 0, 1, 2 -> -1, 0, 1 relative to center
+                xPos = size.width / 2 + CGFloat(index - 1) * spacing
+                yPos = bottomY
+            } else {
+                // Top Row (2 items)
+                // Center them: index 3, 4. 
+                // Index 3 maps to -0.5 offset, Index 4 maps to +0.5 offset
+                // index - 3 gives 0 and 1. (i - 0.5) gives -0.5 and 0.5
+                xPos = size.width / 2 + CGFloat(Double(index - 3) - 0.5) * spacing
+                yPos = topY
+            }
+            
+            clothingNode.position = CGPoint(x: xPos, y: yPos)
+
             clothingNode.originalPosition = clothingNode.position
             clothingNode.zPosition = 10
             clothingNode.alpha = 0
