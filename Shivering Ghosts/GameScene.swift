@@ -600,14 +600,17 @@ class GhostNode: SKNode {
             // Pozisyonlama: şapka yukarı, atkı ortada, kazak aşağıda
             switch item.type {
             case .hat:
-                spriteNode.position = CGPoint(x: 0, y: sprite.size.height * 0.38)
-                spriteNode.size = CGSize(width: sprite.size.width * 0.7, height: sprite.size.height * 0.32)
+                // Hat sits lower on the head and is wider
+                spriteNode.position = CGPoint(x: 0, y: sprite.size.height * 0.24)
+                spriteNode.size = CGSize(width: sprite.size.width * 1.0, height: sprite.size.height * 0.45)
             case .scarf:
-                spriteNode.position = CGPoint(x: 0, y: sprite.size.height * 0.05)
-                spriteNode.size = CGSize(width: sprite.size.width * 0.8, height: sprite.size.height * 0.22)
+                // Scarf sits below the face (neck area)
+                spriteNode.position = CGPoint(x: 0, y: -sprite.size.height * 0.08)
+                spriteNode.size = CGSize(width: sprite.size.width * 0.9, height: sprite.size.height * 0.25)
             case .sweater:
-                spriteNode.position = CGPoint(x: 0, y: -sprite.size.height * 0.13)
-                spriteNode.size = CGSize(width: sprite.size.width * 0.8, height: sprite.size.height * 0.28)
+                // Sweater sits on the body
+                spriteNode.position = CGPoint(x: 0, y: -sprite.size.height * 0.32)
+                spriteNode.size = CGSize(width: sprite.size.width * 0.85, height: sprite.size.height * 0.35)
             }
             container.addChild(spriteNode)
         } else {
