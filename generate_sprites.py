@@ -127,6 +127,120 @@ def draw_ghost():
     
     return img
 
+def draw_baby_ghost():
+    """Draw a baby ghost - Same shape but cute features"""
+    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Baby Color (Light Blue Tint)
+    body_color = (240, 248, 255, 255) # Alice Blue
+    outline = (40, 40, 60, 255)
+    
+    # 1. EXACT SAME BODY SHAPE AS STANDARD
+    # Top Circle
+    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
+    # Bottom Rect
+    draw.rectangle([30, 140, 270, 320], fill=body_color)
+    draw.line([30, 140, 30, 320], fill=outline, width=8)
+    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    
+    # Wavy Bottom
+    wave_y = 320
+    wave_h = 40
+    points = [(30, wave_y)]
+    for i in range(1, 7):
+        x = 30 + (240 * i / 6)
+        y = wave_y + (wave_h if i % 2 != 0 else 0)
+        points.append((x, y))
+    
+    # Close shape for fill
+    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
+    draw.polygon(fill_points, fill=body_color)
+    for i in range(len(points)-1):
+        draw.line([points[i], points[i+1]], fill=outline, width=8)
+
+    # 2. UNIQUE FEATURES
+    # Big Cute Eyes
+    eye_y = 135
+    draw.ellipse([80, eye_y, 115, eye_y+35], fill=(30, 30, 40, 255))
+    draw.ellipse([185, eye_y, 220, eye_y+35], fill=(30, 30, 40, 255))
+    # Sparkle in eyes
+    draw.ellipse([95, eye_y+5, 105, eye_y+15], fill=(255, 255, 255, 255))
+    draw.ellipse([200, eye_y+5, 210, eye_y+15], fill=(255, 255, 255, 255))
+    
+    # Pacifier
+    mouth_y = 170
+    # Shield
+    draw.ellipse([130, mouth_y, 170, mouth_y+30], fill=(255, 192, 203, 255), outline=outline, width=3)
+    # Ring
+    draw.arc([135, mouth_y+10, 165, mouth_y+40], start=0, end=180, fill=outline, width=3)
+    
+    # Rosy Cheeks
+    draw.ellipse([60, 160, 90, 180], fill=(255, 182, 193, 150))
+    draw.ellipse([210, 160, 240, 180], fill=(255, 182, 193, 150))
+    
+    # Arms
+    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
+    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
+    
+    return img
+
+def draw_rare_ghost():
+    """Draw a rare ghost - Same shape but premium look"""
+    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    
+    # Rare Color (Gold Tint)
+    body_color = (255, 250, 205, 255) # Lemon Chiffon
+    outline = (184, 134, 11, 255) # Dark Goldenrod
+    
+    # 1. EXACT SAME BODY SHAPE
+    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
+    draw.rectangle([30, 140, 270, 320], fill=body_color)
+    draw.line([30, 140, 30, 320], fill=outline, width=8)
+    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    
+    wave_y = 320
+    wave_h = 40
+    points = [(30, wave_y)]
+    for i in range(1, 7):
+        x = 30 + (240 * i / 6)
+        y = wave_y + (wave_h if i % 2 != 0 else 0)
+        points.append((x, y))
+    
+    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
+    draw.polygon(fill_points, fill=body_color)
+    for i in range(len(points)-1):
+        draw.line([points[i], points[i+1]], fill=outline, width=8)
+
+    # 2. UNIQUE FEATURES
+    # Star Eyes
+    eye_y = 130
+    def draw_star(cx, cy, size, color):
+        pts = []
+        for i in range(10):
+            angle = math.pi/2 + i * math.pi/5
+            r = size if i % 2 == 0 else size/2.5
+            pts.append((cx + math.cos(angle)*r, cy - math.sin(angle)*r))
+        draw.polygon(pts, fill=color)
+
+    draw_star(100, eye_y+15, 18, outline)
+    draw_star(200, eye_y+15, 18, outline)
+
+    # Mouth (Smirk)
+    mouth_y = 170
+    draw.arc([130, mouth_y, 170, mouth_y+15], start=0, end=180, fill=outline, width=4)
+    
+    # Sparkles around body
+    draw_star(50, 80, 10, (255, 215, 0, 255))
+    draw_star(260, 100, 8, (255, 215, 0, 255))
+    
+    # Arms
+    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
+    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
+    
+    return img
+
 def draw_beanie(color_name):
     """Draw a beanie that fits the ghost head"""
     img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
@@ -250,6 +364,9 @@ def main():
     # 1. Ghost
     ghost = draw_ghost()
     save_sprite(ghost, "ghost_standard")
+    
+    save_sprite(draw_baby_ghost(), "ghost_baby")
+    save_sprite(draw_rare_ghost(), "ghost_rare")
     
     # 2. Hats
     save_sprite(draw_beanie('red'), "kirmizi_sapka")
