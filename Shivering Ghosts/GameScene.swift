@@ -84,7 +84,7 @@ struct ClothingItem: Equatable {
             switch color {
             case .red: return "kirmizi_sapka"
             case .blue: return "mavi_sapka"
-            case .purple: return "cadi_sapkasi"
+            case .purple: return "sari_sapka"  // Yellow beanie
             default: return "kirmizi_sapka"
             }
         case .scarf:
@@ -98,8 +98,8 @@ struct ClothingItem: Equatable {
             switch color {
             case .purple: return "mor_kazak"
             case .orange: return "turuncu_kazak"
-            case .green: return "yesil_kazak"
-            default: return "yesil_kazak"
+            case .green: return "pembe_kazak"  // Pink sweater
+            default: return "pembe_kazak"
             }
         }
     }
@@ -509,133 +509,7 @@ class GhostNode: SKNode {
         childNode(withName: "stormOverlay")?.removeFromParent()
     }
     
-    private func addColdParticles(intense: Bool = false) {
-        // Clear old particles first to avoid buildup
-        childNode(withName: "coldParticles")?.removeFromParent()
-        childNode(withName: "leafParticles")?.removeFromParent()
-        childNode(withName: "rainParticles")?.removeFromParent()
-        childNode(withName: "stormOverlay")?.removeFromParent()
-        
-        let size = scene?.size ?? CGSize(width: 400, height: 800)
-        
-        // 1. Snowflakes
-        let snowEmitter = SKEmitterNode()
-        snowEmitter.name = "coldParticles"
-        snowEmitter.particleTexture = SKTexture(imageNamed: "snowflake")
-        snowEmitter.particleBirthRate = intense ? 150 : 30 // Dense if intense
-        snowEmitter.particleLifetime = 7.0
-        snowEmitter.particlePositionRange = CGVector(dx: size.width, dy: 100)
-        snowEmitter.emissionAngle = intense ? -CGFloat.pi / 2 - 0.5 : -CGFloat.pi / 2 - 0.2 // More wind
-        snowEmitter.emissionAngleRange = CGFloat.pi / 4
-        snowEmitter.particleSpeed = intense ? 120 : 50
-        snowEmitter.particleSpeedRange = 20
-        snowEmitter.xAcceleration = intense ? -50 : -5
-        snowEmitter.yAcceleration = -10
-        snowEmitter.particleAlpha = 0.9
-        snowEmitter.particleAlphaRange = 0.2
-        snowEmitter.particleScale = 0.3
-        snowEmitter.particleScaleRange = 0.2
-        snowEmitter.particleRotationSpeed = 1.0
-        // Position relative to ghost center (0,0) -> Top of screen slightly adjustable
-        snowEmitter.position = CGPoint(x: 0, y: size.height * 0.5) 
-        snowEmitter.zPosition = 50
-        addChild(snowEmitter)
-        
-        // 2. Wind Leaves
-        let leafEmitter = SKEmitterNode()
-        leafEmitter.name = "leafParticles"
-        leafEmitter.particleTexture = SKTexture(imageNamed: "leaf") // Use the actual leaf asset
-        leafEmitter.particleColor = .white // Let texture color show through mostly
-        leafEmitter.particleColorBlendFactor = 0.0
-        leafEmitter.particleBirthRate = intense ? 2.5 : 0.8
-        leafEmitter.particleLifetime = 10.0
-        leafEmitter.particlePositionRange = CGVector(dx: size.width, dy: 50)
-        leafEmitter.emissionAngle = intense ? -CGFloat.pi / 2 - 0.8 : -CGFloat.pi / 2 - 0.4
-        leafEmitter.emissionAngleRange = 0.5 // More spread
-        leafEmitter.particleSpeed = intense ? 150 : 60
-        leafEmitter.particleSpeedRange = 20
-        leafEmitter.xAcceleration = intense ? -60 : -15
-        leafEmitter.yAcceleration = -5
-        leafEmitter.particleRotation = 0
-        leafEmitter.particleRotationRange = CGFloat.pi * 2
-        leafEmitter.particleRotationSpeed = intense ? 3.0 : 1.5
-        leafEmitter.particleScale = 0.4
-        leafEmitter.particleScaleRange = 0.2
-        leafEmitter.particleAlpha = 0.9
-        leafEmitter.particleAlphaRange = 0.2
-        leafEmitter.position = CGPoint(x: 0, y: size.height * 0.6) // Start higher
-        leafEmitter.zPosition = 49
-        addChild(leafEmitter)
-        
-        // 3. Occasional Rain
-        if Bool.random() || intense {
-            let rainEmitter = SKEmitterNode()
-            rainEmitter.name = "rainParticles"
-            rainEmitter.particleTexture = nil
-            rainEmitter.particleSize = CGSize(width: 2, height: 45)
-            rainEmitter.particleColor = UIColor(white: 0.9, alpha: 0.35)
-            rainEmitter.particleBirthRate = intense ? 300 : 80
-            rainEmitter.particleLifetime = 2.0
-            rainEmitter.particlePositionRange = CGVector(dx: size.width + 100, dy: 0)
-            rainEmitter.emissionAngle = intense ? -CGFloat.pi / 2 - 0.3 : -CGFloat.pi / 2 - 0.1
-            rainEmitter.particleSpeed = intense ? 1200 : 900
-            rainEmitter.particleSpeedRange = 200
-            rainEmitter.position = CGPoint(x: 0, y: size.height * 0.6)
-            rainEmitter.zPosition = 51
-            addChild(rainEmitter)
-        }
-        
-        if intense {
-            // Dark overlay for storm
-            let overlay = SKShapeNode(rectOf: size)
-            overlay.fillColor = .black
-            overlay.alpha = 0.3
-            overlay.strokeColor = .clear
-            overlay.zPosition = 48
-            overlay.name = "stormOverlay"
-            addChild(overlay)
-        }
-    }
-    
-    private func activateStorm() {
-        isStormActive = true
-        stormTimer = Double.random(in: 8...12) // Storm lasts 8-12 seconds
-        
-        // Show warning
-        let warningLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        warningLabel.text = "⚠️ BLIZZARD! ⚠️"
-        warningLabel.fontSize = 32
-        warningLabel.fontColor = .red
-        warningLabel.position = CGPoint(x: 0, y: 200)
-        warningLabel.zPosition = 100
-        addChild(warningLabel)
-        
-        warningLabel.run(SKAction.sequence([
-            SKAction.scale(to: 1.2, duration: 0.2),
-            SKAction.scale(to: 1.0, duration: 0.2),
-            SKAction.wait(forDuration: 2.0),
-            SKAction.fadeOut(withDuration: 0.5),
-            SKAction.removeFromParent()
-        ]))
-        
-        // Intensify weather
-        addColdParticles(intense: true)
-        
-        // Increase wind sound volume
-        windSoundPlayer?.volume = 1.0 // Max volume
-    }
-    
-    private func deactivateStorm() {
-        isStormActive = false
-        timeSinceLastStorm = 0
-        
-        // Normal weather
-        addColdParticles(intense: false)
-        
-        // Restore wind sound volume
-        let settings = CollectionManager.shared.settings
-        windSoundPlayer?.volume = settings.soundEffectsEnabled ? 0.3 : 0.0
-    }
+
     
     func shiverHarder() {
         guard let sprite = childNode(withName: "ghostSprite") as? SKSpriteNode else { return }
@@ -913,6 +787,39 @@ class GhostNode: SKNode {
             float.timingMode = .easeOut
             heart.run(float)
         }
+    }
+    
+    private func addColdParticles() {
+        // Remove existing cold particles if any
+        childNode(withName: "coldParticles")?.removeFromParent()
+        
+        // Create snowflake emitter for cold effect
+        let emitter = SKEmitterNode()
+        emitter.name = "coldParticles"
+        emitter.particleTexture = SKTexture(imageNamed: "snowflake")
+        emitter.particleBirthRate = 15
+        emitter.particleLifetime = 2.0
+        emitter.particleLifetimeRange = 0.5
+        emitter.particlePositionRange = CGVector(dx: 150, dy: 50)
+        emitter.emissionAngle = -CGFloat.pi / 2 // Falling down
+        emitter.emissionAngleRange = 0.5
+        emitter.particleSpeed = 60
+        emitter.particleSpeedRange = 20
+        emitter.yAcceleration = -20
+        emitter.xAcceleration = CGFloat.random(in: -10...10)
+        emitter.particleAlpha = 0.8
+        emitter.particleAlphaSpeed = -0.3
+        emitter.particleScale = 0.3
+        emitter.particleScaleRange = 0.15
+        emitter.particleRotation = 0
+        emitter.particleRotationSpeed = 2.0
+        emitter.particleRotationRange = CGFloat.pi
+        emitter.particleColor = .white
+        emitter.particleColorBlendFactor = 1.0
+        
+        emitter.position = CGPoint(x: 0, y: 180)
+        emitter.zPosition = 50
+        addChild(emitter)
     }
     
     func floatAway() {
@@ -1668,8 +1575,7 @@ class GameScene: SKScene {
         addChild(timerBar)
     }
     
-        addChild(timerBar)
-    }
+
     
     // MARK: - PowerUp Logic
     private func spawnPowerUp() {
@@ -1742,6 +1648,104 @@ class GameScene: SKScene {
                 }
             }
         }
+    }
+    
+    // MARK: - Storm System
+    private func activateStorm() {
+        isStormActive = true
+        stormTimer = TimeInterval.random(in: 5.0...10.0) // Storm lasts 5-10 seconds
+        timeSinceLastStorm = 0
+        
+        // Visual storm effect - darken the scene
+        let stormOverlay = SKShapeNode(rectOf: size)
+        stormOverlay.name = "stormOverlay"
+        stormOverlay.fillColor = UIColor(white: 0, alpha: 0.3)
+        stormOverlay.strokeColor = .clear
+        stormOverlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        stormOverlay.zPosition = 90
+        stormOverlay.alpha = 0
+        addChild(stormOverlay)
+        stormOverlay.run(SKAction.fadeIn(withDuration: 0.5))
+        
+        // Add rain particles
+        let rainEmitter = SKEmitterNode()
+        rainEmitter.name = "stormRain"
+        rainEmitter.particleBirthRate = 200
+        rainEmitter.particleLifetime = 2.0
+        rainEmitter.particlePositionRange = CGVector(dx: size.width, dy: 0)
+        rainEmitter.emissionAngle = -CGFloat.pi / 2 - 0.3
+        rainEmitter.particleSpeed = 400
+        rainEmitter.particleSpeedRange = 100
+        rainEmitter.yAcceleration = -200
+        rainEmitter.particleAlpha = 0.5
+        rainEmitter.particleAlphaSpeed = -0.2
+        rainEmitter.particleScale = 0.05
+        rainEmitter.particleScaleRange = 0.02
+        rainEmitter.particleColor = .cyan
+        rainEmitter.particleColorBlendFactor = 1.0
+        
+        // Create a simple raindrop texture
+        let raindropSize = CGSize(width: 3, height: 20)
+        UIGraphicsBeginImageContextWithOptions(raindropSize, false, 0)
+        UIColor.white.setFill()
+        UIBezierPath(roundedRect: CGRect(origin: .zero, size: raindropSize), cornerRadius: 1.5).fill()
+        let raindropImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        if let image = raindropImage {
+            rainEmitter.particleTexture = SKTexture(image: image)
+        }
+        
+        rainEmitter.position = CGPoint(x: size.width / 2, y: size.height + 50)
+        rainEmitter.zPosition = 91
+        addChild(rainEmitter)
+        
+        // Make ghost shiver harder
+        currentGhost?.shiverHarder()
+        
+        // Storm warning label
+        let stormLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        stormLabel.name = "stormLabel"
+        stormLabel.text = "⛈️ STORM!"
+        stormLabel.fontSize = 28
+        stormLabel.fontColor = .cyan
+        stormLabel.position = CGPoint(x: size.width / 2, y: size.height - 120)
+        stormLabel.zPosition = 100
+        stormLabel.alpha = 0
+        addChild(stormLabel)
+        
+        let pulse = SKAction.sequence([
+            SKAction.fadeIn(withDuration: 0.3),
+            SKAction.repeatForever(SKAction.sequence([
+                SKAction.scale(to: 1.1, duration: 0.5),
+                SKAction.scale(to: 1.0, duration: 0.5)
+            ]))
+        ])
+        stormLabel.run(pulse)
+        
+        // Play storm sound if available
+        playSFX("storm.m4a")
+    }
+    
+    private func deactivateStorm() {
+        isStormActive = false
+        timeSinceLastStorm = 0
+        
+        // Remove storm visuals
+        childNode(withName: "stormOverlay")?.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 0.5),
+            SKAction.removeFromParent()
+        ]))
+        
+        childNode(withName: "stormRain")?.run(SKAction.sequence([
+            SKAction.run { (self.childNode(withName: "stormRain") as? SKEmitterNode)?.particleBirthRate = 0 },
+            SKAction.wait(forDuration: 2.0),
+            SKAction.removeFromParent()
+        ]))
+        
+        childNode(withName: "stormLabel")?.run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 0.3),
+            SKAction.removeFromParent()
+        ]))
     }
     
     private func ghostTimedOut() {

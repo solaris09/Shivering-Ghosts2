@@ -17,7 +17,7 @@ ASSETS_CLOTHING_DIR = os.path.join(ASSETS_DIR, "kiyafet")
 os.makedirs(ASSETS_DIR, exist_ok=True)
 os.makedirs(ASSETS_CLOTHING_DIR, exist_ok=True)
 
-# Colors
+# Colors (Pastel Kawaii Palette)
 COLORS = {
     'red': (231, 76, 60),      # Alizarin
     'blue': (52, 152, 219),    # Peter River
@@ -25,6 +25,7 @@ COLORS = {
     'purple': (155, 89, 182),  # Amethyst
     'orange': (243, 156, 18),  # Orange
     'yellow': (241, 196, 15),  # Sun Flower
+    'pink': (255, 182, 193),   # Light Pink
     'white': (236, 240, 241),  # Clouds
     'black': (44, 62, 80)      # Midnight Blue
 }
@@ -71,335 +72,229 @@ HEAD_W = GHOST_W * 0.8  # 240
 HEAD_H = GHOST_H * 0.4  # 160
 BODY_W = GHOST_W * 0.9  # 270
 
-def draw_ghost():
-    """Draw the base naked ghost"""
-    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+# --- Helper Functions for Kawaii Style ---
+def add_glow(img, color, radius=15):
+    """Add a soft glow effect behind the image"""
+    # Create a glow layer
+    glow = img.copy()
+    # Extract alpha
+    alpha = glow.split()[-1]
+    # Blur the alpha channel to create transparency mask for glow
+    blurred_alpha = alpha.filter(ImageFilter.GaussianBlur(radius))
     
-    # Body color
-    white = (245, 245, 255, 255)
-    shadow = (220, 220, 240, 255)
-    outline = (40, 40, 60, 255)
+    # Create solid color image
+    glow_color = Image.new("RGB", img.size, color)
+    # Apply blurred alpha as mask to solid color
+    glow_layer = Image.new("RGBA", img.size, (0,0,0,0))
+    glow_layer.paste(glow_color, (0,0), mask=blurred_alpha)
+    glow_layer.putalpha(blurred_alpha)
     
-    # Main Body Shape (Pear/Blob)
-    # Top Circle
-    draw.ellipse([30, 20, 270, 260], fill=white, outline=outline, width=8)
-    # Bottom Rect
-    draw.rectangle([30, 140, 270, 320], fill=white)
-    # Draw side lines to connect
-    draw.line([30, 140, 30, 320], fill=outline, width=8)
-    draw.line([270, 140, 270, 320], fill=outline, width=8)
-    
-    # Wavy Bottom
-    wave_y = 320
-    wave_h = 40
-    points = [(30, wave_y)]
-    for i in range(1, 7):
-        x = 30 + (240 * i / 6)
-        y = wave_y + (wave_h if i % 2 != 0 else 0)
-        points.append((x, y))
-    
-    # Close shape for fill
-    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
-    draw.polygon(fill_points, fill=white)
-    # Draw bottom outline
-    for i in range(len(points)-1):
-        draw.line([points[i], points[i+1]], fill=outline, width=8)
+    # Composite: Glow -> Image
+    ids = Image.new("RGBA", img.size, (0,0,0,0))
+    ids.alpha_composite(glow_layer)
+    ids.alpha_composite(img)
+    return ids
 
-    # Face using simple shapes
-    # Eyes
-    eye_y = 130
-    draw.ellipse([90, eye_y, 115, eye_y+35], fill=(30, 30, 40, 255)) # Left
-    draw.ellipse([185, eye_y, 210, eye_y+35], fill=(30, 30, 40, 255)) # Right
-    # Blush
-    draw.ellipse([70, 150, 90, 170], fill=(255, 200, 200, 100))
-    draw.ellipse([210, 150, 230, 170], fill=(255, 200, 200, 100))
+def draw_kawaii_body(draw, color, outline, w=GHOST_W, h=GHOST_H):
+    """Draws the cute simple blob shape"""
+    # Shape: Round top, slightly wider bottom, wavy skirt
+    # Using a series of curves for a "Mochi" blob look
     
-    # Mouth (Shivering)
-    mouth_y = 165
-    draw.arc([130, mouth_y, 170, mouth_y+20], start=0, end=180, fill=outline, width=5)
+    # Coordinates
+    marg_x = 40
+    marg_y = 50
+    bot_y = 350
     
-    # Arms (Nubs)
-    draw.arc([10, 180, 50, 230], start=90, end=270, fill=white, width=10) # Left nub fake
-    # Actually just simple side bumps
-    draw.ellipse([10, 180, 50, 220], fill=white, outline=outline, width=6)
-    draw.ellipse([250, 180, 290, 220], fill=white, outline=outline, width=6)
+    # Main body path
+    # Top arc
+    draw.chord([marg_x, marg_y, w-marg_x, 250], start=180, end=0, fill=color, outline=outline, width=8)
+    # Side lines (slightly curved outwards for cuteness)
+    # Left
+    draw.line([marg_x, 150, marg_x-10, bot_y-20], fill=outline, width=8)
+    # Right
+    draw.line([w-marg_x, 150, w-marg_x+10, bot_y-20], fill=outline, width=8)
     
-    return img
+    # Fill middle rect-ish area
+    draw.rectangle([marg_x, 150, w-marg_x, bot_y-20], fill=color)
+    # Fill sides gaps
+    draw.polygon([(marg_x, 150), (marg_x-10, bot_y-20), (marg_x, bot_y-20)], fill=color)
+    draw.polygon([(w-marg_x, 150), (w-marg_x+10, bot_y-20), (w-marg_x, bot_y-20)], fill=color)
+
+    # Wavy Bottom
+    wave_count = 5
+    wave_w = (w - 2 * (marg_x-10)) / wave_count
+    start_x = marg_x - 10
+    
+    points = []
+    for i in range(wave_count):
+        wx = start_x + i * wave_w
+        # Quadratic curve points for wave
+        # This is hard with polygon, so we draw circles or arcs for the "skirt" ends
+        # Simplified: Draw rounded line
+        draw.chord([wx, bot_y-30, wx+wave_w, bot_y+10], start=0, end=180, fill=color, outline=outline, width=8)
+        # Cover the top stroke of the chord to blend
+        draw.rectangle([wx+4, bot_y-30, wx+wave_w-4, bot_y-20], fill=color)
+
+def draw_kawaii_face(draw, happy=True, shiver=True):
+    """Draws cute dot eyes and mouth"""
+    # Eyes: Small black dots, wide set
+    eye_y = 160
+    eye_radius = 8
+    eye_spacing = 70
+    center_x = GHOST_W // 2
+    
+    # Left Eye
+    draw.ellipse([center_x - eye_spacing - eye_radius, eye_y - eye_radius, 
+                  center_x - eye_spacing + eye_radius, eye_y + eye_radius], fill='black')
+    # Right Eye
+    draw.ellipse([center_x + eye_spacing - eye_radius, eye_y - eye_radius, 
+                  center_x + eye_spacing + eye_radius, eye_y + eye_radius], fill='black')
+    
+    # Cheeks (Pastel Pink)
+    blush_y = 175
+    draw.ellipse([center_x - eye_spacing - 20, blush_y, center_x - eye_spacing, blush_y+10], fill=(255, 182, 193, 150))
+    draw.ellipse([center_x + eye_spacing, blush_y, center_x + eye_spacing + 20, blush_y+10], fill=(255, 182, 193, 150))
+
+    # Mouth
+    mouth_y = 180
+    if happy:
+        # Tiny 'u' shape
+        draw.arc([center_x - 10, mouth_y, center_x + 10, mouth_y + 15], start=0, end=180, fill='black', width=4)
+    else:
+        # Wavy shivering line (~ ~)
+        # Draw manually
+        mx, my = center_x, mouth_y + 10
+        draw.line([mx-15, my, mx-5, my-5], fill='black', width=3)
+        draw.line([mx-5, my-5, mx+5, my+5], fill='black', width=3)
+        draw.line([mx+5, my+5, mx+15, my], fill='black', width=3)
+
+# --- Updated Ghost Functions ---
+
+def draw_ghost():
+    """Draw Standard Kawaii Ghost"""
+    base = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(base)
+    
+    # Pastel Colors
+    body_color = (255, 255, 255, 230) # Milky White, semi-transparent
+    outline_color = (100, 100, 120, 200) # Soft Grey-Blue Outline
+    
+    draw_kawaii_body(draw, body_color, outline_color)
+    draw_kawaii_face(draw, happy=False, shiver=True)
+    
+    # Add Glow
+    final = add_glow(base, (200, 230, 255), radius=20)
+    return final
 
 def draw_baby_ghost():
-    """Draw a baby ghost - Same shape but cute features"""
-    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+    """Draw Baby Kawaii Ghost"""
+    base = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(base)
     
-    # Baby Color (Light Blue Tint)
-    body_color = (240, 248, 255, 255) # Alice Blue
-    outline = (40, 40, 60, 255)
+    # Pastel Blue Tint
+    body_color = (225, 245, 254, 230) # Light Pastel Blue
+    outline_color = (70, 130, 180, 200)
     
-    # 1. EXACT SAME BODY SHAPE AS STANDARD
-    # Top Circle
-    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
-    # Bottom Rect
-    draw.rectangle([30, 140, 270, 320], fill=body_color)
-    draw.line([30, 140, 30, 320], fill=outline, width=8)
-    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    draw_kawaii_body(draw, body_color, outline_color)
     
-    # Wavy Bottom
-    wave_y = 320
-    wave_h = 40
-    points = [(30, wave_y)]
-    for i in range(1, 7):
-        x = 30 + (240 * i / 6)
-        y = wave_y + (wave_h if i % 2 != 0 else 0)
-        points.append((x, y))
+    # Big Sparkly Eyes
+    eye_y = 165
+    eye_r = 12
+    spacing = 65
+    cx = GHOST_W // 2
     
-    # Close shape for fill
-    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
-    draw.polygon(fill_points, fill=body_color)
-    for i in range(len(points)-1):
-        draw.line([points[i], points[i+1]], fill=outline, width=8)
-
-    # 2. UNIQUE FEATURES
-    # Big Cute Eyes
-    eye_y = 135
-    draw.ellipse([80, eye_y, 115, eye_y+35], fill=(30, 30, 40, 255))
-    draw.ellipse([185, eye_y, 220, eye_y+35], fill=(30, 30, 40, 255))
-    # Sparkle in eyes
-    draw.ellipse([95, eye_y+5, 105, eye_y+15], fill=(255, 255, 255, 255))
-    draw.ellipse([200, eye_y+5, 210, eye_y+15], fill=(255, 255, 255, 255))
+    # Eyes
+    draw.ellipse([cx-spacing-eye_r, eye_y-eye_r, cx-spacing+eye_r, eye_y+eye_r], fill='black')
+    draw.ellipse([cx+spacing-eye_r, eye_y-eye_r, cx+spacing+eye_r, eye_y+eye_r], fill='black')
+    # Sparkles
+    draw.ellipse([cx-spacing, eye_y-5, cx-spacing+5, eye_y], fill='white')
+    draw.ellipse([cx+spacing, eye_y-5, cx+spacing+5, eye_y], fill='white')
     
     # Pacifier
-    mouth_y = 170
-    # Shield
-    draw.ellipse([130, mouth_y, 170, mouth_y+30], fill=(255, 192, 203, 255), outline=outline, width=3)
-    # Ring
-    draw.arc([135, mouth_y+10, 165, mouth_y+40], start=0, end=180, fill=outline, width=3)
-    
-    # Rosy Cheeks
-    draw.ellipse([60, 160, 90, 180], fill=(255, 182, 193, 150))
-    draw.ellipse([210, 160, 240, 180], fill=(255, 182, 193, 150))
-    
-    # Arms
-    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
-    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
-    
-    return img
+    mouth_y = 190
+    draw.ellipse([cx-15, mouth_y-10, cx+15, mouth_y+10], fill=(255, 175, 175, 255), outline=outline_color, width=2)
+    draw.arc([cx-10, mouth_y, cx+10, mouth_y+15], start=0, end=180, fill=outline_color, width=2)
+
+    final = add_glow(base, (173, 216, 230), radius=20)
+    return final
 
 def draw_rare_ghost():
-    """Draw a rare ghost - Same shape but premium look"""
-    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+    """Draw Rare (Premium) Kawaii Ghost"""
+    base = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(base)
     
-    # Rare Color (Gold Tint)
-    body_color = (255, 250, 205, 255) # Lemon Chiffon
-    outline = (184, 134, 11, 255) # Dark Goldenrod
+    # Pastel Purple/Gold Gradient feel (Solid for PIL)
+    body_color = (250, 240, 255, 235) # Pastel Lavender
+    outline_color = (147, 112, 219, 255) # Medium Purple
     
-    # 1. EXACT SAME BODY SHAPE
-    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
-    draw.rectangle([30, 140, 270, 320], fill=body_color)
-    draw.line([30, 140, 30, 320], fill=outline, width=8)
-    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    draw_kawaii_body(draw, body_color, outline_color)
     
-    wave_y = 320
-    wave_h = 40
-    points = [(30, wave_y)]
-    for i in range(1, 7):
-        x = 30 + (240 * i / 6)
-        y = wave_y + (wave_h if i % 2 != 0 else 0)
-        points.append((x, y))
-    
-    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
-    draw.polygon(fill_points, fill=body_color)
-    for i in range(len(points)-1):
-        draw.line([points[i], points[i+1]], fill=outline, width=8)
-
-    # 2. UNIQUE FEATURES
     # Star Eyes
-    eye_y = 130
-    def draw_star(cx, cy, size, color):
-        pts = []
-        for i in range(10):
-            angle = math.pi/2 + i * math.pi/5
-            r = size if i % 2 == 0 else size/2.5
-            pts.append((cx + math.cos(angle)*r, cy - math.sin(angle)*r))
-        draw.polygon(pts, fill=color)
+    eye_y = 160
+    s_size = 15
+    spacing = 70
+    cx = GHOST_W // 2
+    
+    def draw_star(x, y, s, c):
+        angles = [i * 4 * math.pi / 10 for i in range(5)]
+        pts = [(x + math.cos(a)*s, y + math.sin(a)*s) for a in angles]
+        draw.polygon(pts, fill=c)
+        
+    draw_star(cx-spacing, eye_y, s_size, outline_color)
+    draw_star(cx+spacing, eye_y, s_size, outline_color)
+    
+    # Smirk
+    draw.arc([cx-5, 190, cx+25, 205], start=20, end=160, fill=outline_color, width=3)
+    
+    # Sparkles around
+    for pos in [(80, 100), (220, 80), (250, 250)]:
+        draw_star(pos[0], pos[1], 10, (255, 215, 0, 255))
 
-    draw_star(100, eye_y+15, 18, outline)
-    draw_star(200, eye_y+15, 18, outline)
-
-    # Mouth (Smirk)
-    mouth_y = 170
-    draw.arc([130, mouth_y, 170, mouth_y+15], start=0, end=180, fill=outline, width=4)
-    
-    # Sparkles around body
-    draw_star(50, 80, 10, (255, 215, 0, 255))
-    draw_star(260, 100, 8, (255, 215, 0, 255))
-    
-    # Arms
-    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
-    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
-    
-    return img
+    final = add_glow(base, (230, 230, 250), radius=25)
+    return final
 
 def draw_dead_ghost():
-    """Draw a dead/charred ghost for game over"""
-    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+    """Draw Dead Ghost (Burnt Mochi)"""
+    base = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(base)
     
-    # Charred Color (Dark Gray)
-    body_color = (80, 80, 90, 255) 
-    outline = (20, 20, 30, 255)
+    body_color = (100, 100, 100, 240) # Grey
+    outline_color = (50, 50, 50, 255)
     
-    # 1. EXACT SAME BODY SHAPE
-    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
-    draw.rectangle([30, 140, 270, 320], fill=body_color)
-    draw.line([30, 140, 30, 320], fill=outline, width=8)
-    draw.line([270, 140, 270, 320], fill=outline, width=8)
+    draw_kawaii_body(draw, body_color, outline_color)
     
-    wave_y = 320
-    wave_h = 40
-    points = [(30, wave_y)]
-    for i in range(1, 7):
-        x = 30 + (240 * i / 6)
-        y = wave_y + (wave_h if i % 2 != 0 else 0)
-        points.append((x, y))
+    # X Eyes
+    eye_y = 160
+    spacing = 70
+    cx = GHOST_W // 2
+    s = 10
     
-    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
-    draw.polygon(fill_points, fill=body_color)
-    for i in range(len(points)-1):
-        draw.line([points[i], points[i+1]], fill=outline, width=8)
-
-    # 2. UNIQUE FEATURES
-    # X-Eyes
-    eye_y = 130
-    def draw_x_eye(cx, cy):
-        s = 15
-        draw.line([cx-s, cy-s, cx+s, cy+s], fill=(20, 20, 20, 255), width=6)
-        draw.line([cx+s, cy-s, cx-s, cy+s], fill=(20, 20, 20, 255), width=6)
-
-    draw_x_eye(100, eye_y+20)
-    draw_x_eye(200, eye_y+20)
-
-    # Mouth (Sad/Frown)
-    mouth_y = 180
-    draw.arc([130, mouth_y, 170, mouth_y+20], start=180, end=0, fill=outline, width=5)
+    def draw_x(x, y):
+        draw.line([x-s, y-s, x+s, y+s], fill='black', width=4)
+        draw.line([x+s, y-s, x-s, y+s], fill='black', width=4)
+        
+    draw_x(cx-spacing, eye_y)
+    draw_x(cx+spacing, eye_y)
     
-    # Soot marks
-    for _ in range(5):
-        import random
-        rx = random.randint(50, 250)
-        ry = random.randint(50, 280)
-        draw.ellipse([rx, ry, rx+10, ry+10], fill=(40, 40, 40, 180))
+    # Frown
+    draw.arc([cx-15, 190, cx+15, 210], start=180, end=0, fill='black', width=4)
     
-    # Arms
-    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
-    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
-    
-    return img
-
-    return img
+    return base
 
 def draw_dead_baby_ghost():
-    """Draw a dead baby ghost (charred + pacifier)"""
-    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
+    """Dead Baby"""
+    # Just reuse dead logic with pacifier
+    img = draw_dead_ghost()
     draw = ImageDraw.Draw(img)
-    
-    # Charred Baby Color (Dark Gray/Blueish)
-    body_color = (80, 85, 95, 255) 
-    outline = (20, 20, 30, 255)
-    
-    # 1. BODY
-    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
-    draw.rectangle([30, 140, 270, 320], fill=body_color)
-    draw.line([30, 140, 30, 320], fill=outline, width=8)
-    draw.line([270, 140, 270, 320], fill=outline, width=8)
-    
-    wave_y = 320
-    wave_h = 40
-    points = [(30, wave_y)]
-    for i in range(1, 7):
-        x = 30 + (240 * i / 6)
-        y = wave_y + (wave_h if i % 2 != 0 else 0)
-        points.append((x, y))
-    
-    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
-    draw.polygon(fill_points, fill=body_color)
-    for i in range(len(points)-1):
-        draw.line([points[i], points[i+1]], fill=outline, width=8)
-
-    # 2. X-EYES (Slightly lower/cuter?)
-    eye_y = 135
-    def draw_x_eye(cx, cy):
-        s = 15
-        draw.line([cx-s, cy-s, cx+s, cy+s], fill=(20, 20, 20, 255), width=6)
-        draw.line([cx+s, cy-s, cx-s, cy+s], fill=(20, 20, 20, 255), width=6)
-    draw_x_eye(90, eye_y+15)
-    draw_x_eye(200, eye_y+15)
-
-    # 3. PACIFIER (Burnt)
-    mouth_y = 175
-    draw.ellipse([130, mouth_y, 170, mouth_y+30], fill=(100, 50, 50, 255), outline=outline, width=3)
-    draw.arc([135, mouth_y+10, 165, mouth_y+40], start=0, end=180, fill=outline, width=3)
-
-    # Arms
-    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
-    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
-    
+    cx = GHOST_W // 2
+    draw.ellipse([cx-15, 200, cx+15, 220], fill=(80, 40, 40), outline='black', width=2)
     return img
 
 def draw_dead_rare_ghost():
-    """Draw a dead rare ghost (charred + broken stars)"""
-    img = Image.new('RGBA', (GHOST_W, GHOST_H), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    
-    # Charred Rare Color (Dark Gray/Brownish)
-    body_color = (90, 85, 70, 255) 
-    outline = (30, 25, 20, 255)
-    
-    # 1. BODY
-    draw.ellipse([30, 20, 270, 260], fill=body_color, outline=outline, width=8)
-    draw.rectangle([30, 140, 270, 320], fill=body_color)
-    draw.line([30, 140, 30, 320], fill=outline, width=8)
-    draw.line([270, 140, 270, 320], fill=outline, width=8)
-    
-    wave_y = 320
-    wave_h = 40
-    points = [(30, wave_y)]
-    for i in range(1, 7):
-        x = 30 + (240 * i / 6)
-        y = wave_y + (wave_h if i % 2 != 0 else 0)
-        points.append((x, y))
-    
-    fill_points = [(30, 140), (270, 140)] + points[::-1] + [(30, wave_y)]
-    draw.polygon(fill_points, fill=body_color)
-    for i in range(len(points)-1):
-        draw.line([points[i], points[i+1]], fill=outline, width=8)
-
-    # 2. BROKEN STAR EYES (X over star?)
-    eye_y = 130
-    def draw_star(cx, cy, size, color):
-        pts = []
-        for i in range(10):
-            angle = math.pi/2 + i * math.pi/5
-            r = size if i % 2 == 0 else size/2.5
-            pts.append((cx + math.cos(angle)*r, cy - math.sin(angle)*r))
-        draw.polygon(pts, fill=outline) 
-        # Just use simple X for dead version but maybe yellow-ish lines
-        s = 15
-        draw.line([cx-s, cy-s, cx+s, cy+s], fill=(60, 50, 0, 255), width=6)
-        draw.line([cx+s, cy-s, cx-s, cy+s], fill=(60, 50, 0, 255), width=6)
-
-    draw_star(100, eye_y+20, 0, None)
-    draw_star(200, eye_y+20, 0, None)
-
-    # Mouth (Frown)
-    mouth_y = 180
-    draw.arc([130, mouth_y, 170, mouth_y+20], start=180, end=0, fill=outline, width=5)
-    
-    # Arms
-    draw.ellipse([10, 180, 50, 220], fill=body_color, outline=outline, width=6)
-    draw.ellipse([250, 180, 290, 220], fill=body_color, outline=outline, width=6)
-    
+    """Dead Rare"""
+    # Reuse dead logic
+    img = draw_dead_ghost()
+    # Add broken star eyes maybe? Kept simple X for now as it's clear
     return img
 
 def draw_leaf():
@@ -653,20 +548,20 @@ def main():
     save_sprite(draw_dead_baby_ghost(), "ghost_baby_dead")
     save_sprite(draw_dead_rare_ghost(), "ghost_rare_dead")
     
-    # 2. Hats
+    # 2. Hats (3 colors: Red, Blue, Yellow)
     save_sprite(draw_beanie('red'), "kirmizi_sapka")
     save_sprite(draw_beanie('blue'), "mavi_sapka")
-    save_sprite(draw_witch_hat(), "cadi_sapkasi") # Purple/Witch
+    save_sprite(draw_beanie('yellow'), "sari_sapka")
     
-    # 3. Scarves
+    # 3. Scarves (3 colors: Red, Blue, Green)
     save_sprite(draw_scarf('red'), "kirmizi_atki")
     save_sprite(draw_scarf('blue'), "mavi_atki")
     save_sprite(draw_scarf('green'), "yesil_atki")
     
-    # 4. Sweaters
+    # 4. Sweaters (3 colors: Purple, Orange, Pink)
     save_sprite(draw_sweater('purple'), "mor_kazak")
     save_sprite(draw_sweater('orange'), "turuncu_kazak")
-    save_sprite(draw_sweater('green'), "yesil_kazak")
+    save_sprite(draw_sweater('pink'), "pembe_kazak")
     
     # 5. Effects & Power-ups
     save_sprite(draw_leaf(), "leaf")
